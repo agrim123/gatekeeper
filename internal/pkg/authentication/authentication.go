@@ -22,12 +22,12 @@ func (dm DefaultModule) IsAuthenticated() (string, bool, error) {
 	}
 
 	if _, ok := root.Users[user.Username]; !ok {
-		return "", false, errors.New("Invalid user")
+		return "", false, errors.New("Invalid user: " + user.Username)
 	}
 
 	// TODO: [Fix] Not an enforcable check
 	if os.Getenv("SUDO_USER") != "" {
-		return "", false, errors.New("Please run as non-sudo. Real user: " + os.Getenv("SUDO_USER"))
+		return "", false, errors.New("Please run as non-sudo. Current real user: " + os.Getenv("SUDO_USER"))
 	}
 
 	fmt.Println("Authenticated as " + user.Username)

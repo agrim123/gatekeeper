@@ -48,3 +48,15 @@ var Users map[string]AccessMapping
 var Roles map[string]Role
 var Servers map[string]Server
 var Plans map[string]Plan
+
+func (p Plan) AllowedOptions() []string {
+	options := make([]string, len(p.Opts))
+
+	i := 0
+	for opt := range p.Opts {
+		options[i] = opt
+		i++
+	}
+
+	return options
+}

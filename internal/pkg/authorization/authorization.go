@@ -7,7 +7,13 @@ import (
 	"github.com/agrim123/gatekeeper/internal/pkg/root"
 )
 
-func IsAuthorized(user, plan, option string) (bool, error) {
+type Module interface {
+	IsAuthorized(user, plan, option string) (bool, error)
+}
+
+type DefaultModule struct{}
+
+func (dm DefaultModule) IsAuthorized(user, plan, option string) (bool, error) {
 	userRoles := make(map[string]bool)
 
 	allowedPlans := make(map[string]bool)
@@ -45,4 +51,8 @@ func IsAuthorized(user, plan, option string) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func NewDefaultModule() *DefaultModule {
+	return &DefaultModule{}
 }
