@@ -2,7 +2,7 @@
     "users": [
         {
             "user": {
-                "email": "agrim@xyz.com"
+                "email": "agrim"
             },
             "roles": [
                 "user-service-deploy"
