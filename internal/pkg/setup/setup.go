@@ -26,7 +26,7 @@ func Start() {
 		finalOptions := make(map[string]root.Option)
 		for name, option := range plan.Options {
 			if name == "deploy" {
-				var deploy root.Deploy
+				var deploy root.Remote
 				deployBytesdata, _ := json.Marshal(option)
 				json.Unmarshal(deployBytesdata, &deploy)
 				finalOptions[name] = deploy

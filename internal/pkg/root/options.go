@@ -6,20 +6,28 @@ type Option interface {
 	Run() error
 }
 
-type Deploy struct {
-	Server   string   `json:"server"`
-	Commands []string `json:"commands"`
+type Remote struct {
+	Server string   `json:"server"`
+	Stages []string `json:"stages"`
 }
 
-func (d Deploy) Run() error {
-	server := Servers[d.Server]
+func (r Remote) Run() error {
+	server := Servers[r.Server]
 
 	for _, instance := range server.Instances {
-		for _, command := range d.Commands {
+		for _, command := range r.Stages {
 			fmt.Println(command)
 			instance.Run(command)
 		}
 	}
 
+	return nil
+}
+
+type Local struct {
+	Stages []string `json:"stages"`
+}
+
+func (l Local) Run() error {
 	return nil
 }

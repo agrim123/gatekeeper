@@ -16,11 +16,6 @@ type Role struct {
 	AllowedPlans []string `json:"allowed_plans"`
 }
 
-type ServerOption struct {
-	Server   string   `json:"server"`
-	Commands []string `json:"commands"`
-}
-
 type Plan struct {
 	Name        string                 `json:"name"`
 	Description string                 `json:"description"`

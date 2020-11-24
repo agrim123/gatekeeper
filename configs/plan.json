@@ -5,15 +5,17 @@
             "description": "User service related",
             "options": {
                 "deploy": {
+                    "type": "remote",
                     "server": "user-service-server",
-                    "commands": [
+                    "stages": [
                         "ls -a",
                         "/usr/bin/whoami"
                     ]
                 },
                 "status": {
+                    "type": "remote",
                     "server": "user-service-server",
-                    "commands": [
+                    "stages": [
                         "mkdir test",
                         "cd test && echo \"test\" > test"
                     ]
