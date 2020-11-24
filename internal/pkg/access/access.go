@@ -3,6 +3,7 @@ package access
 import (
 	"encoding/json"
 
+	"github.com/agrim123/gatekeeper/internal/app/actions"
 	"github.com/spf13/viper"
 )
 
@@ -22,26 +23,33 @@ type AccessMapping struct {
 	Roles []string
 }
 
-type Action struct {
-	Name        string                 `json:"name"`
-	Description string                 `json:"description"`
-	Type        string                 `json:"type"`
-	Command     string                 `json:"command"`
-	Attributes  map[string]interface{} `json:"attributes"`
-}
-
 var Mappings map[string]AccessMapping
 var Roles map[string]Role
-var Actions map[string]Action
+var Actions map[string]actions.ActionX
 
 func Init() {
-	var actions []Action
-	actionsByteData, _ := json.Marshal(viper.Get("actions"))
-	json.Unmarshal(actionsByteData, &actions)
+	type actionTemp struct {
+		actions.BaseAction
+		Attributes map[string]interface{} `json:"attributes"`
+	}
 
-	Actions = make(map[string]Action)
-	for _, action := range actions {
-		Actions[action.Name] = action
+	var actionsInterface []actionTemp
+	actionsByteData, _ := json.Marshal(viper.Get("actions"))
+	json.Unmarshal(actionsByteData, &actionsInterface)
+
+	Actions = make(map[string]actions.ActionX)
+	for _, action := range actionsInterface {
+		if action.Type == "ssh" {
+			Actions[action.Name] = actions.ActionX{
+				BaseAction: action.BaseAction,
+				Attributes: actions.SSH{
+					User:       action.Attributes["user"].(string),
+					IP:         action.Attributes["ip"].(string),
+					Port:       action.Attributes["port"].(string),
+					PrivateKey: action.Attributes["private_key"].(string),
+				},
+			}
+		}
 	}
 
 	var roles []Role

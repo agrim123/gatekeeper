@@ -8,13 +8,30 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-type SSHComand struct {
-	User       string
-	IP         string
-	PrivateKey string
+type Remote struct {
+	Address string
+
+	Config ssh.ClientConfig
+
+	Client *ssh.Client
 }
 
-func PublicKeyFile(file string) ssh.AuthMethod {
+func NewRemoteConnection(user, ip, port, privateKey string) *Remote {
+	remote := Remote{
+		Config: ssh.ClientConfig{
+			User: user,
+			Auth: []ssh.AuthMethod{
+				publicKeyFile(privateKey),
+			},
+			HostKeyCallback: ssh.InsecureIgnoreHostKey(), // TODO: change
+		},
+		Address: ip + ":" + port,
+	}
+
+	return &remote
+}
+
+func publicKeyFile(file string) ssh.AuthMethod {
 	buffer, err := ioutil.ReadFile(file)
 	if err != nil {
 		return nil
@@ -28,8 +45,12 @@ func PublicKeyFile(file string) ssh.AuthMethod {
 	return ssh.PublicKeys(key)
 }
 
-func runCommand(cmd string, conn *ssh.Client) {
-	sess, err := conn.NewSession()
+func (r *Remote) Close() error {
+	return r.Client.Close()
+}
+
+func (r *Remote) RunCommand(cmd string) {
+	sess, err := r.Client.NewSession()
 	if err != nil {
 		panic(err)
 	}
@@ -55,21 +76,11 @@ func runCommand(cmd string, conn *ssh.Client) {
 	}
 }
 
-func Connect(sshCommand SSHComand) {
-	sshConfig := &ssh.ClientConfig{
-		User: sshCommand.User,
-		Auth: []ssh.AuthMethod{
-			PublicKeyFile(sshCommand.PrivateKey),
-		},
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-	}
-
-	connection, err := ssh.Dial("tcp", sshCommand.IP+":22", sshConfig)
+func (r *Remote) MakeNewConnection() {
+	connection, err := ssh.Dial("tcp", r.Address, &r.Config)
 	if err != nil {
 		panic("Failed to dial: " + err.Error())
 	}
 
-	defer connection.Close()
-
-	// runCommand("bash ~/a.sh", connection)
+	r.Client = connection
 }
