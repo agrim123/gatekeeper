@@ -4,17 +4,14 @@ type Action interface {
 	Run(cmd string) error
 }
 
-type BaseAction struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Type        string `json:"type"`
-	Command     string `json:"command"`
-}
-
 type ActionX struct {
-	BaseAction
+	Name        string                 `json:"name"`
+	Description string                 `json:"description"`
+	Type        string                 `json:"type"`
+	Command     string                 `json:"command"`
+	Attributes  map[string]interface{} `json:"attributes"`
 
-	Action Action
+	Action Action `json:"-"`
 }
 
 func (a *ActionX) Run() {

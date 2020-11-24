@@ -2,6 +2,7 @@ package access
 
 import (
 	"encoding/json"
+	"errors"
 
 	"github.com/agrim123/gatekeeper/internal/app/actions"
 	"github.com/spf13/viper"
@@ -11,6 +12,14 @@ type User struct {
 	FullName string `json:"full_name"`
 	Email    string `json:"email"`
 	Username string `json:"username"`
+}
+
+func (u *User) Authenticate() (bool, error) {
+	if _, ok := Mappings[u.Email]; !ok {
+		return false, errors.New("Invalid user")
+	}
+
+	return true, nil
 }
 
 type Role struct {
@@ -28,12 +37,7 @@ var Roles map[string]Role
 var Actions map[string]actions.ActionX
 
 func Init() {
-	type actionTemp struct {
-		actions.BaseAction
-		Attributes map[string]interface{} `json:"attributes"`
-	}
-
-	var actionsInterface []actionTemp
+	var actionsInterface []actions.ActionX
 	actionsByteData, _ := json.Marshal(viper.Get("actions"))
 	json.Unmarshal(actionsByteData, &actionsInterface)
 
@@ -41,7 +45,10 @@ func Init() {
 	for _, action := range actionsInterface {
 		if action.Type == "ssh" {
 			Actions[action.Name] = actions.ActionX{
-				BaseAction: action.BaseAction,
+				Name:        action.Name,
+				Description: action.Description,
+				Type:        action.Type,
+				Command:     action.Command,
 				Action: actions.SSH{
 					User:       action.Attributes["user"].(string),
 					IP:         action.Attributes["ip"].(string),
