@@ -1,0 +1,12 @@
+{
+    "users": [
+        {
+            "user": {
+                "email": "agrim@xyz.com"
+            },
+            "roles": [
+                "user-service-deploy"
+            ]
+        }
+    ]
+}

@@ -1,0 +1,24 @@
+{
+    "plan": [
+        {
+            "name": "user_service",
+            "description": "User service related",
+            "options": {
+                "deploy": {
+                    "server": "user-service-server",
+                    "commands": [
+                        "ls -a",
+                        "/usr/bin/whoami"
+                    ]
+                },
+                "status": {
+                    "server": "user-service-server",
+                    "commands": [
+                        "mkdir test",
+                        "cd test && echo \"test\" > test"
+                    ]
+                }
+            }
+        }
+    ]
+}

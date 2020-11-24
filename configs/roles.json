@@ -2,9 +2,8 @@
     "roles": [
         {
             "name": "user-service-deploy",
-            "actions": [
-                "action1",
-                "action2"
+            "allowed_plans": [
+                "user_service.*"
             ]
         }
     ]
