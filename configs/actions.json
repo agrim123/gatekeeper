@@ -1,0 +1,19 @@
+{
+    "actions": [
+        {
+            "name": "action1",
+            "description": "List files from home folder",
+            "type": "ssh",
+            "attributes": {
+                "user": "ec2-user",
+                "ip": "ec2-18-136-197-111.ap-southeast-1.compute.amazonaws.com",
+                "private_key": "/Users/agrim/Downloads/aws-new.pem"
+            },
+            "command": "ls"
+        },
+        {
+            "name": "action2",
+            "command": "du -hd 1 ."
+        }
+    ]
+}

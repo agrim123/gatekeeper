@@ -1,0 +1,14 @@
+{
+    "access_mappings": [
+        {
+            "user": {
+                "full_name": "Agrim Mittal",
+                "email": "agrim@xyz.com",
+                "username": "agrim"
+            },
+            "roles": [
+                "user-service-deploy"
+            ]
+        }
+    ]
+}
