@@ -46,7 +46,7 @@ func main() {
 	}
 
 	if len(os.Args) < 3 {
-		fmt.Println(root.Plans[plan].Options)
+		fmt.Println(root.Plans[plan].Opts)
 		return
 	}
 
