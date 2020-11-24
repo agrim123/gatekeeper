@@ -1,6 +1,7 @@
 package remote
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -17,11 +18,16 @@ type Remote struct {
 }
 
 func NewRemoteConnection(user, ip, port, privateKey string) *Remote {
+	pubkey, err := publicKeyFile(privateKey)
+	if err != nil {
+		panic(err)
+	}
+
 	remote := Remote{
 		Config: ssh.ClientConfig{
 			User: user,
 			Auth: []ssh.AuthMethod{
-				publicKeyFile(privateKey),
+				pubkey,
 			},
 			HostKeyCallback: ssh.InsecureIgnoreHostKey(), // TODO: change
 		},
@@ -31,18 +37,36 @@ func NewRemoteConnection(user, ip, port, privateKey string) *Remote {
 	return &remote
 }
 
-func publicKeyFile(file string) ssh.AuthMethod {
+func verifyPrivateKeyPermissions(privateKey string) error {
+	info, err := os.Stat(privateKey)
+	if err != nil {
+		return err
+	}
+
+	allowedPerm := uint32(0400)
+	if uint32(info.Mode()) & ^allowedPerm == 0 {
+		return nil
+	}
+
+	return fmt.Errorf("Check private key: '%s' permissions. Have %v, want %v", privateKey, info.Mode(), os.FileMode(allowedPerm))
+}
+
+func publicKeyFile(file string) (ssh.AuthMethod, error) {
+	if err := verifyPrivateKeyPermissions(file); err != nil {
+		return nil, err
+	}
+
 	buffer, err := ioutil.ReadFile(file)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
 	key, err := ssh.ParsePrivateKey(buffer)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
-	return ssh.PublicKeys(key)
+	return ssh.PublicKeys(key), nil
 }
 
 func (r *Remote) Close() error {

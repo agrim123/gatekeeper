@@ -11,14 +11,12 @@ type BaseAction struct {
 	Command     string `json:"command"`
 }
 
-type Attributes Action
-
 type ActionX struct {
 	BaseAction
 
-	Attributes
+	Action Action
 }
 
 func (a *ActionX) Run() {
-	a.Attributes.Run(a.Command)
+	a.Action.Run(a.Command)
 }

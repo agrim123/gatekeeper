@@ -42,7 +42,7 @@ func Init() {
 		if action.Type == "ssh" {
 			Actions[action.Name] = actions.ActionX{
 				BaseAction: action.BaseAction,
-				Attributes: actions.SSH{
+				Action: actions.SSH{
 					User:       action.Attributes["user"].(string),
 					IP:         action.Attributes["ip"].(string),
 					Port:       action.Attributes["port"].(string),
