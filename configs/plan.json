@@ -19,6 +19,12 @@
                         "mkdir test",
                         "cd test && echo \"test\" > test"
                     ]
+                },
+                "something": {
+                    "type": "local",
+                    "stages": [
+                        "/usr/bin/whoami"
+                    ]
                 }
             }
         }

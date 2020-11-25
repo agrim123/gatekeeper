@@ -24,17 +24,20 @@ func Init() {
 	store.Plans = make(map[string]store.Plan)
 	for _, plan := range plans {
 		finalOptions := make(map[string]store.Option)
-		for name, option := range plan.Options {
-			if name == "deploy" {
-				var deploy store.Remote
-				deployBytesdata, _ := json.Marshal(option)
-				json.Unmarshal(deployBytesdata, &deploy)
-				finalOptions[name] = deploy
-			} else if name == "status" {
-				var status store.Remote
-				statusBytesdata, _ := json.Marshal(option)
-				json.Unmarshal(statusBytesdata, &status)
-				finalOptions[name] = status
+		for name, optionInterface := range plan.Options {
+			option := optionInterface.(map[string]interface{})
+
+			switch option["type"].(string) {
+			case "remote":
+				var remote store.Remote
+				remoteBytesdata, _ := json.Marshal(option)
+				json.Unmarshal(remoteBytesdata, &remote)
+				finalOptions[name] = remote
+			case "local":
+				var local store.Local
+				localBytesdata, _ := json.Marshal(option)
+				json.Unmarshal(localBytesdata, &local)
+				finalOptions[name] = local
 			}
 		}
 

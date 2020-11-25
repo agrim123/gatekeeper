@@ -79,8 +79,7 @@ func (r *Runtime) Execute() error {
 	r.authorize()
 
 	fmt.Println(fmt.Sprintf("Executing plan: %s %s", r.plan, r.option))
-	return nil
-	// fmt.Println(store.Plans[plan].Opts[option].Run())
+	return store.Plans[r.plan].Opts[r.option].Run()
 }
 
 func (r *Runtime) WithAuthorizationModule(authorizationModule authorization.Module) *Runtime {
