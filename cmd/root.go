@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -19,7 +20,9 @@ var runPlanCmd = &cobra.Command{
 	Short: "Print the version number of Hugo",
 	Long:  `All software has versions. This is Hugo's`,
 	Run: func(cmd *cobra.Command, args []string) {
-		g := gatekeeper.NewGatekeeper()
+		ctx := context.Background()
+
+		g := gatekeeper.NewGatekeeper(ctx)
 
 		switch len(args) {
 		case 1:
