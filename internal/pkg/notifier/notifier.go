@@ -4,6 +4,7 @@ import "github.com/spf13/viper"
 
 type Notifier interface {
 	Notify(message string) error
+	FallbackNotify(message string)
 }
 
 func GetNotifier() Notifier {

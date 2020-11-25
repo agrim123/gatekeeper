@@ -9,6 +9,10 @@ func NewDefaultNotifier() Default {
 }
 
 func (d Default) Notify(message string) error {
-	fmt.Println("[Notifier] " + message)
+	d.FallbackNotify(message)
 	return nil
+}
+
+func (d Default) FallbackNotify(message string) {
+	fmt.Println("[Notifier] " + message)
 }

@@ -14,23 +14,18 @@ type slackRequestBody struct {
 }
 
 type Slack struct {
+	Default
+
 	Hook string
 }
 
 func (s Slack) Notify(message string) error {
 	fmt.Println("Sending notification")
 
-	SendSlackNotification(s.Hook, message)
-	return nil
-}
-
-// SendSlackNotification will post to an 'Incoming Webook' url setup in Slack Apps. It accepts
-// some text and the slack channel is saved within Slack.
-func SendSlackNotification(webhookURL string, msg string) error {
-
-	slackBody, _ := json.Marshal(slackRequestBody{Text: msg})
-	req, err := http.NewRequest(http.MethodPost, webhookURL, bytes.NewBuffer(slackBody))
+	slackBody, _ := json.Marshal(slackRequestBody{Text: message})
+	req, err := http.NewRequest(http.MethodPost, s.Hook, bytes.NewBuffer(slackBody))
 	if err != nil {
+		s.FallbackNotify(message)
 		return err
 	}
 
@@ -39,13 +34,16 @@ func SendSlackNotification(webhookURL string, msg string) error {
 	client := &http.Client{Timeout: 10 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
+		s.FallbackNotify(message)
 		return err
 	}
 
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(resp.Body)
 	if buf.String() != "ok" {
-		return errors.New("Non-ok response returned from Slack")
+		s.FallbackNotify(message)
+		return errors.New("Unable to send notification to slack")
 	}
+
 	return nil
 }

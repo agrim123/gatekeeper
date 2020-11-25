@@ -60,5 +60,12 @@ func (g *GateKeeper) Run(plan, option string) {
 
 	g.runtime.Execute()
 
-	g.Notifier.Notify(fmt.Sprintf("Plan `%s %s` executed by `%s` successfully!", plan, option, g.ctx.Value(constants.UserContextKey)))
+	g.Notifier.Notify(
+		fmt.Sprintf(
+			"Plan `%s %s` executed by `%s` successfully!",
+			plan,
+			option,
+			g.ctx.Value(constants.UserContextKey),
+		),
+	)
 }
