@@ -3,30 +3,30 @@ package setup
 import (
 	"encoding/json"
 
-	"github.com/agrim123/gatekeeper/internal/pkg/root"
+	"github.com/agrim123/gatekeeper/internal/pkg/store"
 	"github.com/spf13/viper"
 )
 
-func Start() {
-	var servers []root.Server
+func Init() {
+	var servers []store.Server
 	serversByteData, _ := json.Marshal(viper.Get("servers"))
 	json.Unmarshal(serversByteData, &servers)
 
-	root.Servers = make(map[string]root.Server)
+	store.Servers = make(map[string]store.Server)
 	for _, server := range servers {
-		root.Servers[server.Name] = server
+		store.Servers[server.Name] = server
 	}
 
-	var plans []root.Plan
+	var plans []store.Plan
 	plansByteData, _ := json.Marshal(viper.Get("plan"))
 	json.Unmarshal(plansByteData, &plans)
 
-	root.Plans = make(map[string]root.Plan)
+	store.Plans = make(map[string]store.Plan)
 	for _, plan := range plans {
-		finalOptions := make(map[string]root.Option)
+		finalOptions := make(map[string]store.Option)
 		for name, option := range plan.Options {
 			if name == "deploy" {
-				var deploy root.Remote
+				var deploy store.Remote
 				deployBytesdata, _ := json.Marshal(option)
 				json.Unmarshal(deployBytesdata, &deploy)
 				finalOptions[name] = deploy
@@ -36,24 +36,24 @@ func Start() {
 		plan.Opts = finalOptions
 		plan.Options = nil
 
-		root.Plans[plan.Name] = plan
+		store.Plans[plan.Name] = plan
 	}
 
-	var roles []root.Role
+	var roles []store.Role
 	rolesByteData, _ := json.Marshal(viper.Get("roles"))
 	json.Unmarshal(rolesByteData, &roles)
 
-	root.Roles = make(map[string]root.Role)
+	store.Roles = make(map[string]store.Role)
 	for _, role := range roles {
-		root.Roles[role.Name] = role
+		store.Roles[role.Name] = role
 	}
 
-	var users []root.AccessMapping
+	var users []store.AccessMapping
 	usersByteData, _ := json.Marshal(viper.Get("users"))
 	json.Unmarshal(usersByteData, &users)
 
-	root.Users = make(map[string]root.AccessMapping)
+	store.Users = make(map[string]store.AccessMapping)
 	for _, user := range users {
-		root.Users[user.User.Email] = user
+		store.Users[user.User.Email] = user
 	}
 }
