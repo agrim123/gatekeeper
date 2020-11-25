@@ -5,6 +5,12 @@
             "allowed_plans": [
                 "user_service.*"
             ]
+        },
+        {
+            "name": "user-service-read",
+            "allowed_plans": [
+                "user_service.status"
+            ]
         }
     ]
 }

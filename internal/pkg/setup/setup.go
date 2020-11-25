@@ -30,6 +30,11 @@ func Init() {
 				deployBytesdata, _ := json.Marshal(option)
 				json.Unmarshal(deployBytesdata, &deploy)
 				finalOptions[name] = deploy
+			} else if name == "status" {
+				var status store.Remote
+				statusBytesdata, _ := json.Marshal(option)
+				json.Unmarshal(statusBytesdata, &status)
+				finalOptions[name] = status
 			}
 		}
 
