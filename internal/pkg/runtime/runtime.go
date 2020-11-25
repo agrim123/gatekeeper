@@ -11,6 +11,8 @@ import (
 )
 
 type Runtime struct {
+	Username string
+
 	Plan   string
 	Option string
 
@@ -38,11 +40,11 @@ func (r *Runtime) SetOption(option string) {
 	r.Option = option
 }
 
-func (r *Runtime) authorize(username string) {
-	if authorized, err := r.AuthorizationModule.IsAuthorized(username, r.Plan, r.Option); !authorized {
+func (r *Runtime) authorize() {
+	if authorized, err := r.AuthorizationModule.IsAuthorized(r.Username, r.Plan, r.Option); !authorized {
 		panic(err)
 	} else {
-		fmt.Println(fmt.Sprintf("Authorized `%s` to perform `%s %s`", username, r.Plan, r.Option))
+		fmt.Println(fmt.Sprintf("Authorized `%s` to perform `%s %s`", r.Username, r.Plan, r.Option))
 	}
 }
 
@@ -66,10 +68,16 @@ func (r *Runtime) verify() {
 	}
 }
 
-func (r *Runtime) Execute(ctx context.Context) {
+func (r *Runtime) Prepare(ctx context.Context, plan, option string) {
+	r.Username = ctx.Value(constants.UserContextKey).(string)
+	r.Plan = plan
+	r.Option = option
+}
+
+func (r *Runtime) Execute() {
 	r.verify()
 
-	r.authorize(ctx.Value(constants.UserContextKey).(string))
+	r.authorize()
 
 	fmt.Println(fmt.Sprintf("Executing plan: %s %s", r.Plan, r.Option))
 	// fmt.Println(store.Plans[plan].Opts[option].Run())

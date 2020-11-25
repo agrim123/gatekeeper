@@ -26,13 +26,10 @@ var runPlanCmd = &cobra.Command{
 
 		switch len(args) {
 		case 1:
-			g.Runtime.SetPlan(args[0])
+			g.Run(args[0], "")
 		default:
-			g.Runtime.SetPlan(args[0])
-			g.Runtime.SetOption(args[1])
+			g.Run(args[0], args[1])
 		}
-
-		g.Run()
 	},
 }
 

@@ -14,7 +14,7 @@ type GateKeeper struct {
 	ctx context.Context
 
 	AuthenticationModule authentication.Module
-	Runtime              *runtime.Runtime
+	runtime              *runtime.Runtime
 }
 
 func NewGatekeeper(ctx context.Context) *GateKeeper {
@@ -25,13 +25,8 @@ func NewGatekeeper(ctx context.Context) *GateKeeper {
 	return &GateKeeper{
 		ctx:                  ctx,
 		AuthenticationModule: authentication.NewDefaultModule(),
-		Runtime:              runtime.NewDefaultRuntime(),
+		runtime:              runtime.NewDefaultRuntime(),
 	}
-}
-
-func (g *GateKeeper) WithRuntime(runtime *runtime.Runtime) *GateKeeper {
-	g.Runtime = runtime
-	return g
 }
 
 func (g *GateKeeper) WithAuthenticationModule(authenticationModule authentication.Module) *GateKeeper {
@@ -48,8 +43,10 @@ func (g *GateKeeper) authenticate() {
 	}
 }
 
-func (g *GateKeeper) Run() {
+func (g *GateKeeper) Run(plan, option string) {
 	g.authenticate()
 
-	g.Runtime.Execute(g.ctx)
+	g.runtime.Prepare(g.ctx, plan, option)
+
+	g.runtime.Execute()
 }
