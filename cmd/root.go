@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/agrim123/gatekeeper/internal/gatekeeper"
+	"github.com/agrim123/gatekeeper/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -21,9 +22,7 @@ var runPlanCmd = &cobra.Command{
 	Long: `Runs plans defined in plan.json. Also takes an option as second argument.
 			For example: gatekeeper run-plan user_service deploy`,
 	Run: func(cmd *cobra.Command, args []string) {
-		ctx := context.Background()
-
-		g := gatekeeper.NewGatekeeper(ctx)
+		g := gatekeeper.NewGatekeeper(utils.AttachExecutingUserToCtx(context.Background()))
 
 		switch len(args) {
 		case 1:

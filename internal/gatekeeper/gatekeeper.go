@@ -45,11 +45,8 @@ func (g *GateKeeper) WithNotifier(notifier notifier.Notifier) *GateKeeper {
 }
 
 func (g *GateKeeper) authenticate() {
-	username, authenticated, err := g.AuthenticationModule.IsAuthenticated()
-	if !authenticated {
+	if authenticated, err := g.AuthenticationModule.IsAuthenticated(g.ctx); !authenticated {
 		panic(err)
-	} else {
-		g.ctx = context.WithValue(g.ctx, constants.UserContextKey, username)
 	}
 }
 
@@ -58,14 +55,25 @@ func (g *GateKeeper) Run(plan, option string) {
 
 	g.runtime.Prepare(g.ctx, plan, option)
 
-	g.runtime.Execute()
-
-	g.Notifier.Notify(
-		fmt.Sprintf(
-			"Plan `%s %s` executed by `%s` successfully!",
-			plan,
-			option,
-			g.ctx.Value(constants.UserContextKey),
-		),
-	)
+	err := g.runtime.Execute()
+	if err != nil {
+		g.Notifier.Notify(
+			fmt.Sprintf(
+				"Plan `%s %s` executed by `%s` failed. Error: %s",
+				plan,
+				option,
+				g.ctx.Value(constants.UserContextKey),
+				err.Error(),
+			),
+		)
+	} else {
+		g.Notifier.Notify(
+			fmt.Sprintf(
+				"Plan `%s %s` executed by `%s` successfully!",
+				plan,
+				option,
+				g.ctx.Value(constants.UserContextKey),
+			),
+		)
+	}
 }

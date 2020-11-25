@@ -1,5 +1,7 @@
 package authentication
 
+import "context"
+
 type Module interface {
-	IsAuthenticated() (string, bool, error)
+	IsAuthenticated(ctx context.Context) (bool, error)
 }

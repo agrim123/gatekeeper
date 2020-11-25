@@ -11,10 +11,9 @@ import (
 )
 
 type Runtime struct {
-	ctx context.Context
-
-	Plan   string
-	Option string
+	ctx    context.Context
+	plan   string
+	option string
 
 	AuthorizationModule authorization.Module
 }
@@ -27,59 +26,60 @@ func NewDefaultRuntime() *Runtime {
 
 func NewRuntime(ctx context.Context, plan, option string) *Runtime {
 	r := NewDefaultRuntime()
-	r.Plan = plan
-	r.Option = option
+	r.plan = plan
+	r.option = option
 	return r
 }
 
-func (r *Runtime) SetPlan(plan string) {
-	r.Plan = plan
+func (r *Runtime) setPlan(plan string) {
+	r.plan = plan
 }
 
-func (r *Runtime) SetOption(option string) {
-	r.Option = option
+func (r *Runtime) setOption(option string) {
+	r.option = option
 }
 
 func (r *Runtime) authorize() {
-	if authorized, err := r.AuthorizationModule.IsAuthorized(r.ctx, r.Plan, r.Option); !authorized {
+	if authorized, err := r.AuthorizationModule.IsAuthorized(r.ctx, r.plan, r.option); !authorized {
 		panic(err)
 	} else {
-		fmt.Println(fmt.Sprintf("Authorized `%s` to perform `%s %s`", r.ctx.Value(constants.UserContextKey).(string), r.Plan, r.Option))
+		fmt.Println(fmt.Sprintf("Authorized `%s` to perform `%s %s`", r.ctx.Value(constants.UserContextKey).(string), r.plan, r.option))
 	}
 }
 
 func (r *Runtime) verify() {
-	if _, ok := store.Plans[r.Plan]; !ok {
+	if _, ok := store.Plans[r.plan]; !ok {
 		allowedPlans := make([]string, 0)
 		for plan := range store.Plans {
 			allowedPlans = append(allowedPlans, plan)
 		}
 
-		log.Fatalf("Invalid plan: `%s`. Allowed plans: %v", r.Plan, allowedPlans)
+		log.Fatalf("Invalid plan: `%s`. Allowed plans: %v", r.plan, allowedPlans)
 	}
 
-	if r.Option == "" {
-		fmt.Println(store.Plans[r.Plan].AllowedOptions())
+	if r.option == "" {
+		fmt.Println(store.Plans[r.plan].AllowedOptions())
 		return
 	}
 
-	if _, ok := store.Plans[r.Plan].Opts[r.Option]; !ok {
-		panic(fmt.Sprintf("Invalid option: %s. Allowed options: %v", r.Option, store.Plans[r.Plan].AllowedOptions()))
+	if _, ok := store.Plans[r.plan].Opts[r.option]; !ok {
+		panic(fmt.Sprintf("Invalid option: %s. Allowed options: %v", r.option, store.Plans[r.plan].AllowedOptions()))
 	}
 }
 
 func (r *Runtime) Prepare(ctx context.Context, plan, option string) {
 	r.ctx = ctx
-	r.Plan = plan
-	r.Option = option
+	r.setPlan(plan)
+	r.setOption(option)
 }
 
-func (r *Runtime) Execute() {
+func (r *Runtime) Execute() error {
 	r.verify()
 
 	r.authorize()
 
-	fmt.Println(fmt.Sprintf("Executing plan: %s %s", r.Plan, r.Option))
+	fmt.Println(fmt.Sprintf("Executing plan: %s %s", r.plan, r.option))
+	return nil
 	// fmt.Println(store.Plans[plan].Opts[option].Run())
 }
 

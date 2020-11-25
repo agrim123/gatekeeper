@@ -1,11 +1,11 @@
 package authentication
 
 import (
+	"context"
 	"errors"
 	"fmt"
-	"os"
-	"os/user"
 
+	"github.com/agrim123/gatekeeper/internal/constants"
 	"github.com/agrim123/gatekeeper/internal/pkg/store"
 )
 
@@ -15,21 +15,13 @@ func NewDefaultModule() *DefaultModule {
 	return &DefaultModule{}
 }
 
-func (dm DefaultModule) IsAuthenticated() (string, bool, error) {
-	user, err := user.Current()
-	if err != nil {
-		return "", false, err
+func (dm DefaultModule) IsAuthenticated(ctx context.Context) (bool, error) {
+	username := ctx.Value(constants.UserContextKey).(string)
+
+	if _, ok := store.Users[username]; !ok {
+		return false, errors.New("Invalid user: " + username)
 	}
 
-	if _, ok := store.Users[user.Username]; !ok {
-		return "", false, errors.New("Invalid user: " + user.Username)
-	}
-
-	// TODO: [Fix] Not an enforcable check
-	if os.Getenv("SUDO_USER") != "" {
-		return "", false, errors.New("Please run as non-sudo. Current real user: " + os.Getenv("SUDO_USER"))
-	}
-
-	fmt.Println("Authenticated as " + user.Username)
-	return user.Username, true, nil
+	fmt.Println("Authenticated as " + username)
+	return true, nil
 }
