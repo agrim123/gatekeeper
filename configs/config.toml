@@ -1,0 +1,4 @@
+[notifier]
+    type="slack"
+    [notifier.slack]
+        hook="https://hooks.slack.com/services/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"
