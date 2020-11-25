@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/agrim123/gatekeeper/cmd/gatekeeper"
+	"github.com/agrim123/gatekeeper/internal/gatekeeper"
 	"github.com/spf13/cobra"
 )
 
@@ -17,8 +17,9 @@ var rootCmd = &cobra.Command{
 
 var runPlanCmd = &cobra.Command{
 	Use:   "run-plan",
-	Short: "Print the version number of Hugo",
-	Long:  `All software has versions. This is Hugo's`,
+	Short: "Runs the specified plan with given option",
+	Long: `Runs plans defined in plan.json. Also takes an option as second argument.
+			For example: gatekeeper run-plan user_service deploy`,
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 

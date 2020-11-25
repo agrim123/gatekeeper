@@ -1,9 +1,11 @@
 package authorization
 
 import (
+	"context"
 	"errors"
 	"strings"
 
+	"github.com/agrim123/gatekeeper/internal/constants"
 	"github.com/agrim123/gatekeeper/internal/pkg/store"
 )
 
@@ -13,11 +15,11 @@ func NewDefaultModule() *DefaultModule {
 	return &DefaultModule{}
 }
 
-func (dm DefaultModule) IsAuthorized(user, plan, option string) (bool, error) {
+func (dm DefaultModule) IsAuthorized(ctx context.Context, plan, option string) (bool, error) {
 	userRoles := make(map[string]bool)
 
 	allowedPlans := make(map[string]bool)
-	for _, role := range store.Users[user].Roles {
+	for _, role := range store.Users[ctx.Value(constants.UserContextKey).(string)].Roles {
 		for _, p := range store.Roles[role].AllowedPlans {
 			allowedPlans[p] = true
 		}
