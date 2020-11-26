@@ -24,6 +24,16 @@ func IsFile(path string) bool {
 	return false
 }
 
+func CopyFilesToDir(files []string, dst string) error {
+	CreateDir(dst)
+	for _, file := range files {
+		fmt.Println(file, dst+filepath.Base(file))
+		Copy(file, dst+filepath.Base(file))
+	}
+
+	return nil
+}
+
 func Copy(src, dst string) error {
 	in, err := os.Open(src)
 	if err != nil {
@@ -41,15 +51,31 @@ func Copy(src, dst string) error {
 	if err != nil {
 		return err
 	}
-	return out.Close()
-}
+	defer out.Close()
 
-func MoveFileToDir(path string) string {
-	errDir := os.MkdirAll("/tmp/gatekeeper/keys", 0755)
-	if errDir != nil {
-		log.Fatal(errDir)
+	err = out.Sync()
+	if err != nil {
+		return err
 	}
 
-	Copy(path, "/tmp/gatekeeper/keys/"+filepath.Base(path))
-	return "/tmp/gatekeeper/keys"
+	si, err := os.Stat(src)
+	if err != nil {
+		return err
+	}
+	err = os.Chmod(dst, si.Mode())
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func CreateDir(path string) {
+	_, err := os.Stat(path)
+	if os.IsNotExist(err) {
+		errDir := os.MkdirAll(path, 0755)
+		if errDir != nil {
+			log.Fatal(errDir)
+		}
+	}
 }

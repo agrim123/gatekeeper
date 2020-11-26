@@ -7,6 +7,7 @@ import (
 	"github.com/agrim123/gatekeeper/internal/constants"
 	"github.com/agrim123/gatekeeper/internal/gatekeeper/runtime"
 	"github.com/agrim123/gatekeeper/internal/pkg/authentication"
+	"github.com/agrim123/gatekeeper/internal/pkg/filesystem"
 	"github.com/agrim123/gatekeeper/internal/pkg/notifier"
 	"github.com/agrim123/gatekeeper/internal/pkg/setup"
 	"github.com/agrim123/gatekeeper/pkg/config"
@@ -25,6 +26,8 @@ func NewGatekeeper(ctx context.Context) *GateKeeper {
 	config.Init()
 
 	setup.Init()
+
+	filesystem.CreateDir("/tmp/gatekeeper")
 
 	return &GateKeeper{
 		ctx:                  ctx,

@@ -7,7 +7,7 @@
                     "user": "ec2-user",
                     "ip": "127.0.0.1",
                     "port": "22",
-                    "private_key": "/Users/agrim/.ssh/aws.pem"
+                    "private_key": "/Users/agrim/projects/personal/gatekeeper/keys/user-service.pem"
                 }
             ]
         }

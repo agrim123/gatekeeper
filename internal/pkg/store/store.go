@@ -1,6 +1,11 @@
 package store
 
-import "github.com/agrim123/gatekeeper/pkg/services/remote"
+import (
+	"github.com/agrim123/gatekeeper/internal/constants"
+	"github.com/agrim123/gatekeeper/internal/pkg/archive"
+	"github.com/agrim123/gatekeeper/internal/pkg/filesystem"
+	"github.com/agrim123/gatekeeper/pkg/services/remote"
+)
 
 type User struct {
 	Email string `json:"email"`
@@ -59,4 +64,18 @@ func (p Plan) AllowedOptions() []string {
 	}
 
 	return options
+}
+
+func (s Server) GetPrivateKeysTar() string {
+	privateKeys := make([]string, 0)
+
+	for _, instance := range s.Instances {
+		privateKeys = append(privateKeys, instance.PrivateKey)
+	}
+
+	filesystem.CopyFilesToDir(privateKeys, constants.PrivateKeysStagingPath)
+
+	archive.Tar(constants.PrivateKeysStagingPath, constants.RootStagingPath)
+
+	return constants.PrivateKeysStagingTarPath
 }

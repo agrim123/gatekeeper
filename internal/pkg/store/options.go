@@ -53,17 +53,18 @@ func (l Local) Run() error {
 
 type Container struct {
 	Name    string
+	Server  string            `json:"server"`
 	Stages  [][]string        `json:"stages"`
 	Volumes map[string]string `json:"volumes"`
 }
 
 func (c Container) Run() error {
-	fmt.Println("Running stage", c.Stages[0])
 	container := containers.Container{
-		Image:  "gatekeeper",
-		Name:   "gatekeeper-jail",
-		Cmds:   c.Stages[0],
-		Mounts: c.Volumes,
+		Image:       "gatekeeper",
+		Name:        "gatekeeper",
+		Cmds:        c.Stages,
+		Mounts:      c.Volumes,
+		FilesToCopy: []string{Servers[c.Server].GetPrivateKeysTar()},
 	}
 
 	container.Create()
