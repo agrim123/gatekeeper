@@ -1,9 +1,10 @@
 package store
 
 import (
+	"context"
 	"fmt"
-	"log"
-	"os/exec"
+
+	"github.com/agrim123/gatekeeper/internal/pkg/containers"
 )
 
 type Option interface {
@@ -36,15 +37,29 @@ type Local struct {
 }
 
 func (l Local) Run() error {
-	for _, stage := range l.Stages {
-		fmt.Println("Running command: " + stage)
-		out, err := exec.Command(stage).Output()
-		if err != nil {
-			log.Fatal(err)
-		}
+	// for _, stage := range l.Stages {
+	// 	fmt.Println("Running command: " + stage)
+	// 	out, err := exec.Command(stage).Output()
+	// 	if err != nil {
+	// 		log.Fatal(err)
+	// 	}
 
-		fmt.Println(string(out))
+	// 	fmt.Println(string(out))
+	// }
+
+	c := containers.Container{
+		Image: "gatekeeper",
+		Name:  "gatekeeper-jail",
+		Cmds:  []string{"/bin/ls", "-lh", "/keys"},
+		Mounts: map[string]string{
+			"<path>": "/keys",
+		},
 	}
+
+	fmt.Println(c.Create())
+	fmt.Println(c.Start(context.Background()))
+	c.TailLogs()
+	c.Cleanup()
 
 	return nil
 }

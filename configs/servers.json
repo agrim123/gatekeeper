@@ -5,9 +5,9 @@
             "instances": [
                 {
                     "user": "ec2-user",
-                    "ip": "ec2-18-136-199-40.ap-southeast-1.compute.amazonaws.com",
+                    "ip": "127.0.0.1",
                     "port": "22",
-                    "private_key": "/Users/agrim/Downloads/aws-new.pem"
+                    "private_key": "/Users/agrim/.ssh/aws.pem"
                 }
             ]
         }
