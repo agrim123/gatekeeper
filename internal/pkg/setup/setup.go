@@ -38,6 +38,11 @@ func Init() {
 				localBytesdata, _ := json.Marshal(option)
 				json.Unmarshal(localBytesdata, &local)
 				finalOptions[name] = local
+			case "container":
+				var container store.Container
+				containerBytesdata, _ := json.Marshal(option)
+				json.Unmarshal(containerBytesdata, &container)
+				finalOptions[name] = container
 			}
 		}
 

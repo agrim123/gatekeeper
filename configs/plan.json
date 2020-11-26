@@ -12,18 +12,20 @@
                         "/usr/bin/whoami"
                     ]
                 },
-                "status": {
-                    "type": "remote",
-                    "server": "user-service-server",
+                "container": {
+                    "type": "container",
+                    "volumes": {
+                        "<host-private-key.pem-path>": "/home/deploy/keys",
+                        "<host-playbooks-path>": "/home/deploy/playbooks"
+                    },
                     "stages": [
-                        "mkdir test",
-                        "cd test && echo \"test\" > test"
-                    ]
-                },
-                "something": {
-                    "type": "local",
-                    "stages": [
-                        "/usr/bin/whoami"
+                        [
+                            "ssh",
+                            "-i",
+                            "/home/deploy/keys/user-service.pem",
+                            "ec2-user@ec2-54-151-132-212.ap-southeast-1.compute.amazonaws.com",
+                            "ls -a"
+                        ]
                     ]
                 }
             }

@@ -3,6 +3,8 @@ package store
 import (
 	"context"
 	"fmt"
+	"log"
+	"os/exec"
 
 	"github.com/agrim123/gatekeeper/internal/pkg/containers"
 )
@@ -37,29 +39,37 @@ type Local struct {
 }
 
 func (l Local) Run() error {
-	// for _, stage := range l.Stages {
-	// 	fmt.Println("Running command: " + stage)
-	// 	out, err := exec.Command(stage).Output()
-	// 	if err != nil {
-	// 		log.Fatal(err)
-	// 	}
+	for _, stage := range l.Stages {
+		fmt.Println("Running command: " + stage)
+		out, err := exec.Command(stage).Output()
+		if err != nil {
+			log.Fatal(err)
+		}
 
-	// 	fmt.Println(string(out))
-	// }
+		fmt.Println(string(out))
+	}
+	return nil
+}
 
-	c := containers.Container{
-		Image: "gatekeeper",
-		Name:  "gatekeeper-jail",
-		Cmds:  []string{"/bin/ls", "-lh", "/keys"},
-		Mounts: map[string]string{
-			"<path>": "/keys",
-		},
+type Container struct {
+	Name    string
+	Stages  [][]string        `json:"stages"`
+	Volumes map[string]string `json:"volumes"`
+}
+
+func (c Container) Run() error {
+	fmt.Println("Running stage", c.Stages[0])
+	container := containers.Container{
+		Image:  "gatekeeper",
+		Name:   "gatekeeper-jail",
+		Cmds:   c.Stages[0],
+		Mounts: c.Volumes,
 	}
 
-	fmt.Println(c.Create())
-	fmt.Println(c.Start(context.Background()))
-	c.TailLogs()
-	c.Cleanup()
+	container.Create()
+	container.Start(context.Background())
+	container.TailLogs()
+	container.Cleanup()
 
 	return nil
 }

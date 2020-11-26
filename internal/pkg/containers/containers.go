@@ -67,8 +67,10 @@ func (c *Container) Create() error {
 
 	ctx := context.Background()
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
-		Image: c.Image,
-		Cmd:   c.Cmds,
+		Image:      c.Image,
+		Cmd:        c.Cmds,
+		WorkingDir: "/home/deploy",
+		User:       "deploy",
 	}, &c.HostConfig, nil, c.Image)
 	if err != nil {
 		return err
@@ -101,7 +103,10 @@ func (c *Container) Start(ctx context.Context) error {
 		return err
 	}
 
-	return nil
+	// Wait for container to exit
+	_, err = cli.ContainerWait(ctx, c.ID)
+
+	return err
 }
 
 func (c *Container) Stop() error {
