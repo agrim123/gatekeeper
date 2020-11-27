@@ -16,6 +16,7 @@ import (
 
 var (
 	containerTimeout time.Duration = time.Second * 2
+	containerHold                  = []string{"sleep", "5000"}
 )
 
 type Container struct {
@@ -72,7 +73,7 @@ func (c *Container) Create() error {
 	ctx := context.Background()
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
 		Image: c.Image,
-		Cmd:   []string{"sleep", "5000"},
+		Cmd:   containerHold,
 	}, &c.HostConfig, nil, c.Name)
 	if err != nil {
 		return err
@@ -133,6 +134,14 @@ func (c *Container) runStages(ctx context.Context, cli *client.Client) error {
 	return nil
 }
 
+// Protect removes shells from container to prevent attaching shell
+// by user. Could find a better and more effective way to achieve this.
+// Problem: User can still run basic commands (echo, ls, cat) using docker exec.
+// Aim: Prevent any kind of interaction with docker container
+func (c *Container) Protect(ctx context.Context, cli *client.Client) {
+	c.runStage(ctx, cli, []string{"rm", "-f", "/bin/sh", "/bin/bash"})
+}
+
 func (c *Container) Start(ctx context.Context) error {
 	cli, err := client.NewEnvClient()
 	defer cli.Close()
@@ -146,6 +155,9 @@ func (c *Container) Start(ctx context.Context) error {
 	}
 
 	c.copyFiles(ctx, cli)
+
+	c.Protect(ctx, cli)
+
 	c.runStages(ctx, cli)
 
 	// Wait for container to exit
