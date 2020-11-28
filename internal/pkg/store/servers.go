@@ -2,8 +2,8 @@ package store
 
 import (
 	"github.com/agrim123/gatekeeper/internal/constants"
-	"github.com/agrim123/gatekeeper/internal/pkg/archive"
 	"github.com/agrim123/gatekeeper/internal/pkg/filesystem"
+	"github.com/agrim123/gatekeeper/internal/pkg/filesystem/archive"
 	"github.com/agrim123/gatekeeper/pkg/services/remote"
 )
 
