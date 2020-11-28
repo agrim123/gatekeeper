@@ -227,7 +227,10 @@ func (c *Container) Remove() error {
 	}
 
 	logger.Infof("Removing container with ID %s", c.ID)
-	err = cli.ContainerRemove(context.Background(), c.ID, types.ContainerRemoveOptions{})
+	err = cli.ContainerRemove(context.Background(), c.ID, types.ContainerRemoveOptions{
+		RemoveLinks:   true,
+		RemoveVolumes: true,
+	})
 
 	return err
 }

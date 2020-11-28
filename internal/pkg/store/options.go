@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"os/exec"
 
 	"github.com/agrim123/gatekeeper/internal/pkg/containers"
@@ -11,6 +12,25 @@ import (
 
 type Option interface {
 	Run() error
+}
+
+// Shell provides a shell on remote server
+type Shell struct {
+	Name   string
+	Server string
+}
+
+func (s Shell) Run() error {
+	server := Servers[s.Server]
+	fmt.Println(server)
+
+	cmd := exec.Command("ssh", "-i", server.Instances[0].PrivateKey, server.Instances[0].User+"@"+server.Instances[0].IP)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Run()
+
+	return nil
 }
 
 type Remote struct {
@@ -33,6 +53,7 @@ func (r Remote) Run() error {
 	return nil
 }
 
+// Local runs commands on local system
 type Local struct {
 	Name   string
 	Stages []string `json:"stages"`
@@ -51,6 +72,7 @@ func (l Local) Run() error {
 	return nil
 }
 
+// Container runs command on remote server
 type Container struct {
 	Name      string
 	Server    string             `json:"server"`
@@ -80,6 +102,12 @@ func (c Container) Run() error {
 		"deploy:deploy",
 		"/home/deploy/keys",
 	}, true))
+
+	container.AddPreStage(*containers.NewStage([]string{
+		"chmod",
+		"400",
+		"/home/deploy/keys/*",
+	}, false))
 
 	container.Create()
 	container.Start(context.Background())
