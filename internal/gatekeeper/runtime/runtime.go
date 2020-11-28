@@ -3,11 +3,11 @@ package runtime
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/agrim123/gatekeeper/internal/constants"
 	"github.com/agrim123/gatekeeper/internal/pkg/authorization"
 	"github.com/agrim123/gatekeeper/internal/pkg/store"
+	"github.com/agrim123/gatekeeper/pkg/logger"
 )
 
 type Runtime struct {
@@ -43,7 +43,7 @@ func (r *Runtime) authorize() {
 	if authorized, err := r.AuthorizationModule.IsAuthorized(r.ctx, r.plan, r.option); !authorized {
 		panic(err)
 	} else {
-		fmt.Println(fmt.Sprintf("Authorized `%s` to perform `%s %s`", r.ctx.Value(constants.UserContextKey).(string), r.plan, r.option))
+		logger.Successf("Authorized `%s` to perform `%s %s`", logger.Underline(r.ctx.Value(constants.UserContextKey).(string)), r.plan, r.option)
 	}
 }
 
@@ -54,7 +54,7 @@ func (r *Runtime) verify() {
 			allowedPlans = append(allowedPlans, plan)
 		}
 
-		log.Fatalf("Invalid plan: `%s`. Allowed plans: %v", r.plan, allowedPlans)
+		logger.Fatalf("Invalid plan: `%s`. Allowed plans: %v", r.plan, allowedPlans)
 	}
 
 	if r.option == "" {
@@ -63,7 +63,7 @@ func (r *Runtime) verify() {
 	}
 
 	if _, ok := store.Plans[r.plan].Opts[r.option]; !ok {
-		panic(fmt.Sprintf("Invalid option: %s. Allowed options: %v", r.option, store.Plans[r.plan].AllowedOptions()))
+		logger.Fatalf("Invalid option: %s. Allowed options: %v", r.option, store.Plans[r.plan].AllowedOptions())
 	}
 }
 
@@ -78,7 +78,7 @@ func (r *Runtime) Execute() error {
 
 	r.authorize()
 
-	fmt.Println(fmt.Sprintf("Executing plan: %s %s", r.plan, r.option))
+	logger.Infof("Executing plan: %s %s", r.plan, r.option)
 	return store.Plans[r.plan].Opts[r.option].Run()
 }
 

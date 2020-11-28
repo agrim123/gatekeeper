@@ -3,10 +3,10 @@ package authentication
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/agrim123/gatekeeper/internal/constants"
 	"github.com/agrim123/gatekeeper/internal/pkg/store"
+	"github.com/agrim123/gatekeeper/pkg/logger"
 )
 
 type DefaultModule struct{}
@@ -22,6 +22,6 @@ func (dm DefaultModule) IsAuthenticated(ctx context.Context) (bool, error) {
 		return false, errors.New("Invalid user: " + username)
 	}
 
-	fmt.Println("Authenticated as " + username)
+	logger.Success("Authenticated as " + logger.Underline(username))
 	return true, nil
 }

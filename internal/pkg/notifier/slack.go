@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"time"
+
+	"github.com/agrim123/gatekeeper/pkg/logger"
 )
 
 type slackRequestBody struct {
@@ -20,7 +21,7 @@ type Slack struct {
 }
 
 func (s Slack) Notify(message string) error {
-	fmt.Println("Sending notification")
+	logger.Info("Sending notification")
 
 	slackBody, _ := json.Marshal(slackRequestBody{Text: message})
 	req, err := http.NewRequest(http.MethodPost, s.Hook, bytes.NewBuffer(slackBody))

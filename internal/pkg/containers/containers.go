@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/agrim123/gatekeeper/internal/pkg/filesystem"
+	"github.com/agrim123/gatekeeper/pkg/logger"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
@@ -53,7 +54,7 @@ func (c *Container) normalizeMounts() {
 	for src, dst := range c.Mounts {
 		// ignore non existent paths
 		if !filesystem.DoesExists(src) {
-			fmt.Println("Path " + src + " not found. Not mounting.")
+			logger.Errorf("Path %s not found. Not mounting", src)
 			continue
 		}
 
@@ -101,7 +102,7 @@ func (c *Container) Create() error {
 
 	c.ID = resp.ID
 	if len(resp.Warnings) > 0 {
-		fmt.Println("Warnings while creating the container", resp.Warnings)
+		logger.Warnf("Warnings while creating the container: %v", resp.Warnings)
 	}
 
 	return nil
@@ -121,7 +122,7 @@ func (c *Container) copyFiles(ctx context.Context, cli *client.Client) {
 }
 
 func (c *Container) runStage(ctx context.Context, cli *client.Client, stage Stage) error {
-	fmt.Println("Running stage:", strings.Join(stage.Command, " "), "with user:", stage.user)
+	logger.L().P(stage.Privileged).Infof("Running stage: %s, with user: %s", logger.Bold(strings.Join(stage.Command, " ")), stage.user)
 	a, err := cli.ContainerExecCreate(ctx, c.ID, types.ExecConfig{
 		User:         stage.user,
 		Cmd:          stage.Command,
@@ -146,7 +147,7 @@ func (c *Container) runStage(ctx context.Context, cli *client.Client, stage Stag
 		return err
 	}
 
-	fmt.Printf("Output: %s\n", b)
+	logger.Infof("Output: %s", b)
 	return nil
 }
 
@@ -181,7 +182,7 @@ func (c *Container) Start(ctx context.Context) error {
 	}
 
 	if err := cli.ContainerStart(ctx, c.ID, types.ContainerStartOptions{}); err != nil {
-		fmt.Println("Error while starting the container", err.Error())
+		logger.Errorf("Error while starting the container: %s", err.Error())
 		return err
 	}
 
@@ -213,7 +214,7 @@ func (c *Container) Stop() error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("Stopped container with ID ", c.ID)
+	logger.Infof("Stopped container with ID %s", c.ID)
 
 	return nil
 }
@@ -225,7 +226,7 @@ func (c *Container) Remove() error {
 		return err
 	}
 
-	fmt.Println("Removing container with ID ", c.ID)
+	logger.Infof("Removing container with ID %s", c.ID)
 	err = cli.ContainerRemove(context.Background(), c.ID, types.ContainerRemoveOptions{})
 
 	return err

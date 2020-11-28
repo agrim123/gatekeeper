@@ -1,6 +1,8 @@
 package notifier
 
-import "fmt"
+import (
+	"github.com/agrim123/gatekeeper/pkg/logger"
+)
 
 type Default struct{}
 
@@ -14,5 +16,5 @@ func (d Default) Notify(message string) error {
 }
 
 func (d Default) FallbackNotify(message string) {
-	fmt.Println("[Notifier] " + message)
+	logger.Notifier(message)
 }
