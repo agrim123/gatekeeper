@@ -1,8 +1,8 @@
 FROM ubuntu:18.04
 
-RUN apt update && apt install software-properties-common ssh -y
+RUN apk add --update openssh
 
-RUN groupadd -r deploy && useradd -m -d /home/deploy -g deploy deploy
+RUN apt update && apt install software-properties-common ssh -y
 
 USER deploy
 WORKDIR /home/deploy
