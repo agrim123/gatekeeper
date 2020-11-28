@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -110,7 +111,11 @@ func (c Container) Run() error {
 	}, false))
 
 	container.Create()
-	container.Start(context.Background())
+	err := container.Start(context.Background())
+	if err != nil {
+		return errors.New("Unable to complete plan")
+	}
+
 	container.TailLogs()
 	container.Cleanup()
 

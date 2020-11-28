@@ -54,7 +54,7 @@ func (c *Container) normalizeMounts() {
 	for src, dst := range c.Mounts {
 		// ignore non existent paths
 		if !filesystem.DoesExists(src) {
-			logger.Errorf("Path %s not found. Not mounting", src)
+			logger.Warnf("Path %s not found. Not mounting", src)
 			continue
 		}
 
@@ -82,6 +82,10 @@ func (c *Container) Create() error {
 		return err
 	}
 
+	ctx := context.Background()
+
+	RemoveContainerIfExistsByName(ctx, c.Name)
+
 	c.normalizeMounts()
 
 	if len(c.containerMounts) > 0 {
@@ -90,7 +94,6 @@ func (c *Container) Create() error {
 		c.HostConfig = container.HostConfig{}
 	}
 
-	ctx := context.Background()
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
 		Image: c.Image,
 		Cmd:   containerHold,
@@ -212,9 +215,12 @@ func (c *Container) Stop() error {
 	// Try to stop using default timeout we are using for beast
 	err = cli.ContainerStop(context.Background(), c.ID, &containerTimeout)
 	if err != nil {
+		if err != nil {
+			logger.Errorf("Unable to stop container: %s, Error: %s", c.ID, err.Error())
+		}
 		return err
 	}
-	logger.Infof("Stopped container with ID %s", c.ID)
+	logger.Infof("Stopped container: %s", c.ID)
 
 	return nil
 }
@@ -226,11 +232,15 @@ func (c *Container) Remove() error {
 		return err
 	}
 
-	logger.Infof("Removing container with ID %s", c.ID)
+	logger.Infof("Removing container: %s", c.ID)
 	err = cli.ContainerRemove(context.Background(), c.ID, types.ContainerRemoveOptions{
-		RemoveLinks:   true,
 		RemoveVolumes: true,
+		Force:         true,
 	})
+
+	if err != nil {
+		logger.Errorf("Unable to remove container: %s, Error: %s", c.ID, err.Error())
+	}
 
 	return err
 }
@@ -253,10 +263,11 @@ func (c *Container) TailLogs() {
 		ShowStderr: true,
 		Details:    true,
 	})
-	defer stream.Close()
 	if err != nil {
-		panic(err)
+		logger.Error(err.Error())
+		return
 	}
+	defer stream.Close()
 
 	logs, _ := ioutil.ReadAll(stream)
 	fmt.Println(string(logs))
