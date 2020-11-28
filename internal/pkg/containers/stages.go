@@ -1,5 +1,7 @@
 package containers
 
+import "strings"
+
 type Stage struct {
 	user string `json:"-"`
 
@@ -20,4 +22,8 @@ func NewStage(command []string, privileged bool) *Stage {
 	}
 
 	return stage
+}
+
+func (s Stage) String() string {
+	return strings.Join(s.Command, " ")
 }

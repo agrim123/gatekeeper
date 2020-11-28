@@ -3,6 +3,7 @@ package containers
 import (
 	"context"
 
+	"github.com/agrim123/gatekeeper/pkg/logger"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
@@ -27,6 +28,10 @@ func RemoveContainerIfExistsByName(ctx context.Context, containerName string) {
 		Filters: filterArgs,
 		All:     true,
 	})
+
+	if len(containers) > 0 {
+		logger.Warnf("Found %d existing containers. %s", len(containers), logger.Bold("These will be removed"))
+	}
 
 	for _, container := range containers {
 		container := Container{ID: container.ID}

@@ -125,7 +125,7 @@ func (c *Container) copyFiles(ctx context.Context, cli *client.Client) {
 }
 
 func (c *Container) runStage(ctx context.Context, cli *client.Client, stage Stage) error {
-	logger.L().P(stage.Privileged).Infof("Running stage: %s, with user: %s", logger.Bold(strings.Join(stage.Command, " ")), stage.user)
+	logger.L().P(stage.Privileged).Infof("Running stage: %s, with user: %s", logger.Bold(stage.String()), stage.user)
 	a, err := cli.ContainerExecCreate(ctx, c.ID, types.ExecConfig{
 		User:         stage.user,
 		Cmd:          stage.Command,
@@ -150,13 +150,18 @@ func (c *Container) runStage(ctx context.Context, cli *client.Client, stage Stag
 		return err
 	}
 
-	logger.Infof("Output: %s", b)
+	logger.Infof("%s %s", logger.Bold("Output:"), b)
 	return nil
 }
 
 func (c *Container) runStages(ctx context.Context, cli *client.Client) error {
 	for _, stage := range c.Stages {
-		c.runStage(ctx, cli, stage)
+		err := c.runStage(ctx, cli, stage)
+		if err != nil {
+			logger.Errorf("Stage `%s` failed. Error: %s", logger.Bold(stage.String()), err.Error())
+		} else {
+			logger.Successf("Stage `%s` completed", logger.Bold(stage.String()))
+		}
 	}
 
 	return nil
@@ -220,7 +225,7 @@ func (c *Container) Stop() error {
 		}
 		return err
 	}
-	logger.Infof("Stopped container: %s", c.ID)
+	logger.Infof("Stopped container: %s", logger.Bold(c.ID))
 
 	return nil
 }
@@ -232,7 +237,7 @@ func (c *Container) Remove() error {
 		return err
 	}
 
-	logger.Infof("Removing container: %s", c.ID)
+	logger.Infof("Removing container: %s", logger.Bold(c.ID))
 	err = cli.ContainerRemove(context.Background(), c.ID, types.ContainerRemoveOptions{
 		RemoveVolumes: true,
 		Force:         true,
