@@ -25,7 +25,7 @@ type Container struct {
 
 	Image string
 
-	Cmds [][]string
+	Stages []Stage
 
 	Mounts map[string]string
 
@@ -46,9 +46,10 @@ func (c *Container) normalizeMounts() {
 		}
 
 		mountBindings = append(mountBindings, mount.Mount{
-			Type:   mount.TypeBind,
-			Source: src,
-			Target: dst,
+			Type:     mount.TypeBind,
+			Source:   src,
+			Target:   dst,
+			ReadOnly: true,
 		})
 	}
 
@@ -74,6 +75,7 @@ func (c *Container) Create() error {
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
 		Image: c.Image,
 		Cmd:   containerHold,
+		User:  "deploy",
 	}, &c.HostConfig, nil, c.Name)
 	if err != nil {
 		return err
@@ -93,14 +95,15 @@ func (c *Container) copyFiles(ctx context.Context, cli *client.Client) {
 
 		s := strings.NewReader(string(dat))
 
-		fmt.Println(cli.CopyToContainer(ctx, c.ID, "/root", s, types.CopyToContainerOptions{AllowOverwriteDirWithFile: true}))
+		fmt.Println(cli.CopyToContainer(ctx, c.ID, "/home/deploy", s, types.CopyToContainerOptions{AllowOverwriteDirWithFile: true}))
 	}
 }
 
-func (c *Container) runStage(ctx context.Context, cli *client.Client, stage []string) error {
-	fmt.Println("Running stage", stage)
+func (c *Container) runStage(ctx context.Context, cli *client.Client, stage Stage) error {
+	fmt.Println("Running stage: ", strings.Join(stage.Command, " "), "with user: ", stage.user)
 	a, err := cli.ContainerExecCreate(ctx, c.ID, types.ExecConfig{
-		Cmd:          stage,
+		User:         stage.user,
+		Cmd:          stage.Command,
 		AttachStdout: true,
 		AttachStderr: true,
 	})
@@ -127,7 +130,7 @@ func (c *Container) runStage(ctx context.Context, cli *client.Client, stage []st
 }
 
 func (c *Container) runStages(ctx context.Context, cli *client.Client) error {
-	for _, stage := range c.Cmds {
+	for _, stage := range c.Stages {
 		c.runStage(ctx, cli, stage)
 	}
 
@@ -139,7 +142,8 @@ func (c *Container) runStages(ctx context.Context, cli *client.Client) error {
 // Problem: User can still run basic commands (echo, ls, cat) using docker exec.
 // Aim: Prevent any kind of interaction with docker container
 func (c *Container) Protect(ctx context.Context, cli *client.Client) {
-	c.runStage(ctx, cli, []string{"rm", "-f", "/bin/sh", "/bin/bash"})
+	stage := NewStage([]string{"rm", "-f", "/bin/sh", "/bin/bash"}, true)
+	c.runStage(ctx, cli, *stage)
 }
 
 func (c *Container) Start(ctx context.Context) error {
@@ -156,7 +160,7 @@ func (c *Container) Start(ctx context.Context) error {
 
 	c.copyFiles(ctx, cli)
 
-	c.Protect(ctx, cli)
+	// c.Protect(ctx, cli)
 
 	c.runStages(ctx, cli)
 

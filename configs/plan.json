@@ -15,16 +15,36 @@
                 "container": {
                     "type": "container",
                     "server": "user-service-server",
-                    "volumes": {},
+                    "volumes": {
+                        "/Users/agrim/playbooks": "/home/deploy/playbooks"
+                    },
                     "stages": [
-                        ["echo", "1"],
-                        [
-                            "ssh",
-                            "-i",
-                            "/root/keys/user-service.pem",
-                            "ec2-user@ec2-54-151-132-212.ap-southeast-1.compute.amazonaws.com",
-                            "ls -a"
-                        ]
+                        {
+                            "command": [
+                                "chown",
+                                "-R",
+                                "deploy:deploy",
+                                "/home/deploy/keys"
+                            ],
+                            "privileged": true
+                        },
+                        {
+                            "command": [
+                                "sleep",
+                                "1d"
+                            ],
+                            "privileged": false
+                        },
+                        {
+                            "command": [
+                                "ssh",
+                                "-i",
+                                "/root/keys/user-service.pem",
+                                "ec2-user@ec2-54-151-132-212.ap-southeast-1.compute.amazonaws.com",
+                                "ls -a"
+                            ],
+                            "privileged": false
+                        }
                     ]
                 }
             }
