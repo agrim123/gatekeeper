@@ -15,19 +15,11 @@
                 "container": {
                     "type": "container",
                     "server": "user-service-server",
+                    "protected": true,
                     "volumes": {
-                        "/Users/agrim/playbooks": "/home/deploy/playbooks"
+                        "/Users/agrim/projects/playbooks": "/home/deploy/playbooks"
                     },
                     "stages": [
-                        {
-                            "command": [
-                                "chown",
-                                "-R",
-                                "deploy:deploy",
-                                "/home/deploy/keys"
-                            ],
-                            "privileged": true
-                        },
                         {
                             "command": [
                                 "sleep",

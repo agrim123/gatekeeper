@@ -11,7 +11,7 @@ import (
 func IsFile(path string) bool {
 	fi, err := os.Stat(path)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("Filesystem error", err)
 		return false
 	}
 	switch mode := fi.Mode(); {
@@ -24,10 +24,20 @@ func IsFile(path string) bool {
 	return false
 }
 
+func DoesExists(path string) bool {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true
+	}
+	if os.IsNotExist(err) {
+		return false
+	}
+	return false
+}
+
 func CopyFilesToDir(files []string, dst string) error {
 	CreateDir(dst)
 	for _, file := range files {
-		fmt.Println(file, dst+filepath.Base(file))
 		Copy(file, dst+filepath.Base(file))
 	}
 

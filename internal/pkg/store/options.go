@@ -52,10 +52,11 @@ func (l Local) Run() error {
 }
 
 type Container struct {
-	Name    string
-	Server  string             `json:"server"`
-	Stages  []containers.Stage `json:"stages"`
-	Volumes map[string]string  `json:"volumes"`
+	Name      string
+	Server    string             `json:"server"`
+	Stages    []containers.Stage `json:"stages"`
+	Volumes   map[string]string  `json:"volumes"`
+	Protected bool               `json:"protected"`
 }
 
 func (c Container) Run() error {
@@ -70,7 +71,15 @@ func (c Container) Run() error {
 		Stages:      stages,
 		Mounts:      c.Volumes,
 		FilesToCopy: []string{Servers[c.Server].GetPrivateKeysTar()},
+		Protected:   c.Protected,
 	}
+
+	container.AddPreStage(*containers.NewStage([]string{
+		"chown",
+		"-R",
+		"deploy:deploy",
+		"/home/deploy/keys",
+	}, true))
 
 	container.Create()
 	container.Start(context.Background())

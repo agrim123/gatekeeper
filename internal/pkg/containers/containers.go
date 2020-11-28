@@ -14,9 +14,17 @@ import (
 	"github.com/docker/docker/client"
 )
 
+const (
+	RootUser    = "root"
+	NonRootUser = "deploy"
+)
+
 var (
 	containerTimeout time.Duration = time.Second * 2
 	containerHold                  = []string{"sleep", "5000"}
+
+	// NonRootUserHomeDir defines the non root user's home directory
+	NonRootUserHomeDir = "/home/" + NonRootUser
 )
 
 type Container struct {
@@ -27,6 +35,8 @@ type Container struct {
 
 	Stages []Stage
 
+	preStages []Stage
+
 	Mounts map[string]string
 
 	containerMounts []mount.Mount
@@ -34,11 +44,19 @@ type Container struct {
 	HostConfig container.HostConfig
 
 	FilesToCopy []string
+
+	Protected bool
 }
 
 func (c *Container) normalizeMounts() {
 	mountBindings := make([]mount.Mount, 0)
 	for src, dst := range c.Mounts {
+		// ignore non existent paths
+		if !filesystem.DoesExists(src) {
+			fmt.Println("Path " + src + " not found. Not mounting.")
+			continue
+		}
+
 		// Convert file to dir to mount to container
 		if filesystem.IsFile(src) {
 			continue
@@ -75,7 +93,7 @@ func (c *Container) Create() error {
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
 		Image: c.Image,
 		Cmd:   containerHold,
-		User:  "deploy",
+		User:  NonRootUser,
 	}, &c.HostConfig, nil, c.Name)
 	if err != nil {
 		return err
@@ -95,12 +113,15 @@ func (c *Container) copyFiles(ctx context.Context, cli *client.Client) {
 
 		s := strings.NewReader(string(dat))
 
-		fmt.Println(cli.CopyToContainer(ctx, c.ID, "/home/deploy", s, types.CopyToContainerOptions{AllowOverwriteDirWithFile: true}))
+		err := cli.CopyToContainer(ctx, c.ID, NonRootUserHomeDir, s, types.CopyToContainerOptions{AllowOverwriteDirWithFile: true})
+		if err != nil {
+			panic(err)
+		}
 	}
 }
 
 func (c *Container) runStage(ctx context.Context, cli *client.Client, stage Stage) error {
-	fmt.Println("Running stage: ", strings.Join(stage.Command, " "), "with user: ", stage.user)
+	fmt.Println("Running stage:", strings.Join(stage.Command, " "), "with user:", stage.user)
 	a, err := cli.ContainerExecCreate(ctx, c.ID, types.ExecConfig{
 		User:         stage.user,
 		Cmd:          stage.Command,
@@ -137,13 +158,19 @@ func (c *Container) runStages(ctx context.Context, cli *client.Client) error {
 	return nil
 }
 
+func (c *Container) AddPreStage(stage Stage) {
+	c.preStages = append(c.preStages, stage)
+}
+
 // Protect removes shells from container to prevent attaching shell
 // by user. Could find a better and more effective way to achieve this.
 // Problem: User can still run basic commands (echo, ls, cat) using docker exec.
 // Aim: Prevent any kind of interaction with docker container
 func (c *Container) Protect(ctx context.Context, cli *client.Client) {
 	stage := NewStage([]string{"rm", "-f", "/bin/sh", "/bin/bash"}, true)
-	c.runStage(ctx, cli, *stage)
+
+	c.AddPreStage(*stage)
+	// c.runStage(ctx, cli, *stage)
 }
 
 func (c *Container) Start(ctx context.Context) error {
@@ -160,7 +187,11 @@ func (c *Container) Start(ctx context.Context) error {
 
 	c.copyFiles(ctx, cli)
 
-	// c.Protect(ctx, cli)
+	if c.Protected {
+		c.Protect(ctx, cli)
+	}
+
+	c.Stages = append(c.preStages, c.Stages...)
 
 	c.runStages(ctx, cli)
 
@@ -201,8 +232,9 @@ func (c *Container) Remove() error {
 }
 
 func (c *Container) Cleanup() {
-	fmt.Println(c.Stop())
-	fmt.Println(c.Remove())
+	if err := c.Stop(); err != nil {
+		c.Remove()
+	}
 }
 
 func (c *Container) TailLogs() {

@@ -14,9 +14,9 @@ func NewStage(command []string, privileged bool) *Stage {
 	}
 
 	if privileged {
-		stage.user = "root"
+		stage.user = RootUser
 	} else {
-		stage.user = "deploy"
+		stage.user = NonRootUser
 	}
 
 	return stage
