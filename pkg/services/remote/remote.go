@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -76,7 +77,48 @@ func (r *Remote) Close() error {
 	return r.Client.Close()
 }
 
+// RunCommands runs mutiple commands in ssh connection
+// FIX: Need to be re looked at
+func (r *Remote) RunCommands(cmds []string) {
+	sess, err := r.Client.NewSession()
+	if err != nil {
+		logger.Fatalf("Failed to create session: ", err)
+	}
+	defer sess.Close()
+
+	// StdinPipe for commands
+	stdin, err := sess.StdinPipe()
+	if err != nil {
+		logger.Fatalf("Failed", err)
+	}
+
+	// Enable system stdout
+	// Comment these if you uncomment to store in variable
+	sess.Stdout = os.Stdout
+	sess.Stderr = os.Stderr
+
+	// Start remote shell
+	err = sess.Shell()
+	if err != nil {
+		logger.Fatalf("Failed", err)
+	}
+
+	for _, cmd := range cmds {
+		_, err = fmt.Fprintf(stdin, "%s\n", cmd)
+		if err != nil {
+			logger.Fatalf("Failed", err)
+		}
+	}
+
+	// Wait for sess to finish
+	err = sess.Wait()
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 func (r *Remote) RunCommand(cmd string) {
+	logger.Infof("Running `%s`", cmd)
 	sess, err := r.Client.NewSession()
 	if err != nil {
 		panic(err)

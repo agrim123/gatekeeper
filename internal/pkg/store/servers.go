@@ -1,6 +1,8 @@
 package store
 
 import (
+	"strings"
+
 	"github.com/agrim123/gatekeeper/internal/constants"
 	"github.com/agrim123/gatekeeper/internal/pkg/filesystem"
 	"github.com/agrim123/gatekeeper/internal/pkg/filesystem/archive"
@@ -37,11 +39,11 @@ func (s Server) GetPrivateKeysTar() string {
 	return constants.PrivateKeysStagingTarPath
 }
 
-func (s Instance) Run(cmd string) error {
+func (s Instance) Run(cmds []string) error {
 	remoteConnection := remote.NewRemoteConnection(s.User, s.IP, s.Port, s.PrivateKey)
 	defer remoteConnection.Close()
 	remoteConnection.MakeNewConnection()
-	remoteConnection.RunCommand(cmd)
+	remoteConnection.RunCommand(strings.Join(cmds, "; "))
 
 	return nil
 }

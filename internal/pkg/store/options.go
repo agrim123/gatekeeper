@@ -64,11 +64,8 @@ func (r Remote) Run() error {
 	server := Servers[r.Server]
 
 	for _, instance := range server.Instances {
-		// TODO: run mutiple command on same connection
-		for _, command := range r.Stages {
-			fmt.Println(command)
-			instance.Run(command)
-		}
+		logger.Infof("Running stages on %s", logger.Bold(instance.String()))
+		instance.Run(r.Stages)
 	}
 
 	return nil
