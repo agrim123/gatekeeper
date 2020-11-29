@@ -98,3 +98,11 @@ func InfofP(message string, attributes ...interface{}) {
 	blue.PrintFunc()("[INFO]  ⬆  | ")
 	fmt.Println(fmt.Sprintf(message, attributes...))
 }
+
+func InfoScan(message string) string {
+	blue.PrintFunc()("[INFO]     | ")
+	fmt.Print(message)
+	var input string
+	fmt.Scanln(&input)
+	return input
+}

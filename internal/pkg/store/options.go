@@ -5,10 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"os"
 	"os/exec"
+	"strconv"
 
 	"github.com/agrim123/gatekeeper/internal/pkg/containers"
+	"github.com/agrim123/gatekeeper/pkg/logger"
+	"github.com/agrim123/gatekeeper/pkg/services/remote"
 )
 
 type Option interface {
@@ -23,13 +25,31 @@ type Shell struct {
 
 func (s Shell) Run() error {
 	server := Servers[s.Server]
-	fmt.Println(server)
 
-	cmd := exec.Command("ssh", "-i", server.Instances[0].PrivateKey, server.Instances[0].User+"@"+server.Instances[0].IP)
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	cmd.Run()
+	instance := server.Instances[0]
+	if len(server.Instances) > 1 {
+		choice := 0
+		for {
+			logger.Infof("Multiple instances present in the cluster.")
+
+			for index, ins := range server.Instances {
+				logger.Infof("[ %d ] %s", index, ins.String())
+			}
+			choice, _ = strconv.Atoi(logger.InfoScan("Choose which one to use: "))
+			if choice < len(server.Instances) {
+				instance = server.Instances[choice]
+				break
+			}
+
+			logger.Errorf("Invalid choice %d", choice)
+		}
+	}
+
+	logger.Infof("Spawning shell for %s", logger.Bold(instance.String()))
+
+	r := remote.NewRemoteConnection(instance.User, instance.IP, instance.Port, instance.PrivateKey)
+	r.MakeNewConnection()
+	r.SpawnShell()
 
 	return nil
 }

@@ -5,12 +5,15 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"os/signal"
+	"syscall"
 
+	"github.com/agrim123/gatekeeper/pkg/logger"
 	"golang.org/x/crypto/ssh"
 )
 
 type Remote struct {
-	Address string
+	address string
 
 	Config ssh.ClientConfig
 
@@ -31,7 +34,7 @@ func NewRemoteConnection(user, ip, port, privateKey string) *Remote {
 			},
 			HostKeyCallback: ssh.InsecureIgnoreHostKey(), // TODO: change
 		},
-		Address: ip + ":" + port,
+		address: ip + ":" + port,
 	}
 
 	return &remote
@@ -101,10 +104,54 @@ func (r *Remote) RunCommand(cmd string) {
 }
 
 func (r *Remote) MakeNewConnection() {
-	connection, err := ssh.Dial("tcp", r.Address, &r.Config)
+	connection, err := ssh.Dial("tcp", r.address, &r.Config)
 	if err != nil {
-		panic("Failed to dial: " + err.Error())
+		logger.Fatalf("Failed to dial. Error: %s", err.Error())
 	}
 
 	r.Client = connection
+}
+
+func (r *Remote) SpawnShell() error {
+	session, _ := r.Client.NewSession()
+
+	if err := setupPty(session); err != nil {
+		logger.Errorf("Failed to set up pseudo terminal. Error: %s", err.Error())
+		return err
+	}
+
+	c := make(chan os.Signal)
+	// Ctrl-C exists the shell
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func(session *ssh.Session) {
+		<-c
+		logger.Info("Ctrl+C pressed. Exiting remote shell")
+		session.Signal(ssh.SIGTERM)
+	}(session)
+
+	session.Stdout = os.Stdout
+	session.Stdin = os.Stdin
+	session.Stderr = os.Stderr
+
+	if err := session.Shell(); err != nil {
+		logger.Errorf("Failed to start interactive shell. Error: %s", err.Error())
+		return err
+	}
+	return session.Wait()
+}
+
+// pty = pseudo terminal
+func setupPty(session *ssh.Session) error {
+	modes := ssh.TerminalModes{
+		ssh.ECHO: 0, // disable echoing
+		// ssh.TTY_OP_ISPEED: 14400, // input speed = 14.4kbaud
+		// ssh.TTY_OP_OSPEED: 14400, // output speed = 14.4kbaud
+	}
+
+	if err := session.RequestPty("xterm", 80, 40, modes); err != nil {
+		session.Close()
+		logger.Errorf("Request for pseudo terminal failed. Error: %s", err.Error())
+		return err
+	}
+	return nil
 }

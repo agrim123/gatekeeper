@@ -14,6 +14,10 @@ type Instance struct {
 	PrivateKey string `json:"private_key"`
 }
 
+func (i Instance) String() string {
+	return i.User + "@" + i.IP
+}
+
 type Server struct {
 	Name      string     `json:"name"`
 	Instances []Instance `json:"instances"`
