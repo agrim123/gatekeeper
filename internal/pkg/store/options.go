@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os/exec"
+	"path/filepath"
 	"strconv"
 
 	"github.com/agrim123/gatekeeper/internal/pkg/containers"
@@ -121,11 +122,14 @@ func (c Container) Run() error {
 		"/home/deploy/keys",
 	}, true))
 
-	container.AddPreStage(*containers.NewStage([]string{
-		"chmod",
-		"400",
-		"/home/deploy/keys/*",
-	}, false))
+	for _, instance := range Servers[c.Server].Instances {
+		container.AddPreStage(*containers.NewStage([]string{
+			"chmod",
+			"400",
+			"/home/deploy/keys/" + filepath.Base(instance.PrivateKey),
+		},
+			false))
+	}
 
 	container.Create()
 	err := container.Start(context.Background())
