@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strconv"
 
+	"github.com/agrim123/gatekeeper/internal/constants"
 	"github.com/agrim123/gatekeeper/internal/pkg/containers"
 	"github.com/agrim123/gatekeeper/pkg/logger"
 	"github.com/agrim123/gatekeeper/pkg/services/remote"
@@ -107,8 +108,8 @@ func (c Container) Run() error {
 	}
 
 	container := containers.Container{
-		Image:       "gatekeeper",
-		Name:        "gatekeeper",
+		Image:       constants.BaseImageName,
+		Name:        constants.BaseContainerName,
 		Stages:      stages,
 		Mounts:      c.Volumes,
 		FilesToCopy: []string{Servers[c.Server].GetPrivateKeysTar()},
@@ -123,12 +124,14 @@ func (c Container) Run() error {
 	}, true))
 
 	for _, instance := range Servers[c.Server].Instances {
-		container.AddPreStage(*containers.NewStage([]string{
-			"chmod",
-			"400",
-			"/home/deploy/keys/" + filepath.Base(instance.PrivateKey),
-		},
-			false))
+		container.AddPreStage(*containers.NewStage(
+			[]string{
+				"chmod",
+				"400",
+				"/home/deploy/keys/" + filepath.Base(instance.PrivateKey),
+			},
+			false,
+		))
 	}
 
 	container.Create()

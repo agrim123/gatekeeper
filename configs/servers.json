@@ -1,13 +1,13 @@
 {
     "servers": [
         {
-            "name": "user-service-server",
+            "name": "service1-server",
             "instances": [
                 {
-                    "user": "ec2-user",
+                    "user": "ubuntu",
                     "ip": "127.0.0.1",
                     "port": "22",
-                    "private_key": "/Users/agrim/projects/personal/gatekeeper/keys/user-service.pem"
+                    "private_key": "keys/service1.pem"
                 }
             ]
         }

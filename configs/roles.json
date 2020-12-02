@@ -1,15 +1,15 @@
 {
     "roles": [
         {
-            "name": "user-service-deploy",
+            "name": "service1-deploy",
             "allowed_plans": [
-                "user_service.*"
+                "service1.*"
             ]
         },
         {
-            "name": "user-service-read",
+            "name": "service1-read",
             "allowed_plans": [
-                "user_service.status"
+                "service1.status"
             ]
         }
     ]

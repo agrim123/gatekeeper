@@ -16,5 +16,5 @@ type Role struct {
 
 var Users map[string]AccessMapping
 var Roles map[string]Role
-var Servers map[string]Server
+var Servers map[string]*Server
 var Plans map[string]Plan

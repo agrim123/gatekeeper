@@ -1,24 +1,25 @@
 {
     "plan": [
         {
-            "name": "user_service",
-            "description": "User service related",
+            "name": "service1",
+            "description": "Service1 related",
             "options": {
                 "shell": {
                     "type": "shell",
-                    "server": "user-service-server"
+                    "server": "service1-server"
                 },
                 "deploy": {
                     "type": "remote",
-                    "server": "user-service-server",
+                    "server": "service1-server",
                     "stages": [
                         "ls -a",
-                        "/usr/bin/whoami"
+                        "/usr/bin/whoami",
+                        "echo \"Hello from remote server\""
                     ]
                 },
                 "container": {
                     "type": "container",
-                    "server": "user-service-server",
+                    "server": "service1-server",
                     "protected": false,
                     "volumes": {
                         "/Users/agrim/projects/playbooks": "/home/deploy/playbooks"

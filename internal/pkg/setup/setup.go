@@ -12,9 +12,10 @@ func Init() {
 	serversByteData, _ := json.Marshal(viper.Get("servers"))
 	json.Unmarshal(serversByteData, &servers)
 
-	store.Servers = make(map[string]store.Server)
+	store.Servers = make(map[string]*store.Server)
 	for _, server := range servers {
-		store.Servers[server.Name] = server
+		server.NormalizeInstancesPrivateKeys()
+		store.Servers[server.Name] = &server
 	}
 
 	var plans []store.Plan

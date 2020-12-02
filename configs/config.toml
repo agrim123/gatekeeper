@@ -1,3 +1,5 @@
+basepath="/Users/agrim/projects/personal/gatekeeper"
+
 [notifier]
     type="slack"
     [notifier.slack]
