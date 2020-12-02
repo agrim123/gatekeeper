@@ -8,7 +8,7 @@ type Plan struct {
 	Opts map[string]Option `json:"-"`
 }
 
-func (p Plan) AllowedOptions() []string {
+func (p Plan) GetOptions() []string {
 	options := make([]string, len(p.Opts))
 
 	i := 0
@@ -18,4 +18,14 @@ func (p Plan) AllowedOptions() []string {
 	}
 
 	return options
+}
+func GetAvailablePlans() []string {
+	plans := make([]string, len(Plans))
+
+	i := 0
+	for plan := range Plans {
+		plans[i] = plan
+		i++
+	}
+	return plans
 }

@@ -19,7 +19,7 @@ type GateKeeper struct {
 	runtime *runtime.Runtime
 	guard   *guard.Guard
 
-	Notifier notifier.Notifier
+	notifier notifier.Notifier
 }
 
 func NewGatekeeper(ctx context.Context) *GateKeeper {
@@ -32,24 +32,22 @@ func NewGatekeeper(ctx context.Context) *GateKeeper {
 	return &GateKeeper{
 		ctx:      ctx,
 		runtime:  runtime.NewDefaultRuntime(),
-		Notifier: notifier.GetNotifier(),
+		notifier: notifier.GetNotifier(),
 		guard:    guard.NewGuard(),
 	}
 }
 
 func (g *GateKeeper) WithNotifier(notifier notifier.Notifier) *GateKeeper {
-	g.Notifier = notifier
+	g.notifier = notifier
 	return g
 }
 
 func (g *GateKeeper) Run(plan, option string) {
 	g.guard.Verify(g.ctx, plan, option)
 
-	g.runtime.Prepare(g.ctx, plan, option)
-
-	err := g.runtime.Execute()
+	err := g.runtime.Execute(g.ctx, plan, option)
 	if err != nil {
-		g.Notifier.Notify(
+		g.notifier.Notify(
 			fmt.Sprintf(
 				"Plan `%s %s` executed by `%s` failed. Error: %s",
 				plan,
@@ -59,7 +57,7 @@ func (g *GateKeeper) Run(plan, option string) {
 			),
 		)
 	} else {
-		g.Notifier.Notify(
+		g.notifier.Notify(
 			fmt.Sprintf(
 				"Plan `%s %s` executed by `%s` successfully!",
 				plan,

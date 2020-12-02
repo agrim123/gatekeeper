@@ -6,6 +6,7 @@ import (
 	"os/user"
 
 	"github.com/agrim123/gatekeeper/internal/constants"
+	"github.com/agrim123/gatekeeper/pkg/logger"
 )
 
 func AttachExecutingUserToCtx(ctx context.Context) context.Context {
@@ -20,8 +21,7 @@ func getExecutingUser() string {
 
 	// TODO: [Fix] Not an enforcable check
 	if os.Getenv("SUDO_USER") != "" {
-		panic("Please run as non-sudo. Current real user: " + os.Getenv("SUDO_USER"))
-		// return "", false, errors.New("Please run as non-sudo. Current real user: " + os.Getenv("SUDO_USER"))
+		logger.Fatalf("Please run as non-sudo. Current real user: %s", logger.Bold(os.Getenv("SUDO_USER")))
 	}
 
 	return user.Username
