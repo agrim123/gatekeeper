@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/agrim123/gatekeeper/internal/constants"
-	"github.com/agrim123/gatekeeper/internal/pkg/authorization"
 	"github.com/agrim123/gatekeeper/internal/pkg/store"
 	"github.com/agrim123/gatekeeper/pkg/logger"
 )
@@ -14,14 +12,10 @@ type Runtime struct {
 	ctx    context.Context
 	plan   string
 	option string
-
-	AuthorizationModule authorization.Module
 }
 
 func NewDefaultRuntime() *Runtime {
-	return &Runtime{
-		AuthorizationModule: authorization.NewDefaultModule(),
-	}
+	return &Runtime{}
 }
 
 func NewRuntime(ctx context.Context, plan, option string) *Runtime {
@@ -37,14 +31,6 @@ func (r *Runtime) setPlan(plan string) {
 
 func (r *Runtime) setOption(option string) {
 	r.option = option
-}
-
-func (r *Runtime) authorize() {
-	if authorized, err := r.AuthorizationModule.IsAuthorized(r.ctx, r.plan, r.option); !authorized {
-		panic(err)
-	} else {
-		logger.Successf("Authorized `%s` to perform `%s %s`", logger.Underline(r.ctx.Value(constants.UserContextKey).(string)), r.plan, r.option)
-	}
 }
 
 func (r *Runtime) verify() {
@@ -76,13 +62,6 @@ func (r *Runtime) Prepare(ctx context.Context, plan, option string) {
 func (r *Runtime) Execute() error {
 	r.verify()
 
-	r.authorize()
-
 	logger.Infof("Executing plan: %s %s", r.plan, r.option)
 	return store.Plans[r.plan].Opts[r.option].Run()
-}
-
-func (r *Runtime) WithAuthorizationModule(authorizationModule authorization.Module) *Runtime {
-	r.AuthorizationModule = authorizationModule
-	return r
 }

@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/agrim123/gatekeeper/internal/constants"
+	"github.com/agrim123/gatekeeper/internal/gatekeeper/guard"
 	"github.com/agrim123/gatekeeper/internal/gatekeeper/runtime"
-	"github.com/agrim123/gatekeeper/internal/pkg/authentication"
 	"github.com/agrim123/gatekeeper/internal/pkg/filesystem"
 	"github.com/agrim123/gatekeeper/internal/pkg/notifier"
 	"github.com/agrim123/gatekeeper/internal/pkg/setup"
@@ -16,8 +16,8 @@ import (
 type GateKeeper struct {
 	ctx context.Context
 
-	AuthenticationModule authentication.Module
-	runtime              *runtime.Runtime
+	runtime *runtime.Runtime
+	guard   *guard.Guard
 
 	Notifier notifier.Notifier
 }
@@ -27,19 +27,14 @@ func NewGatekeeper(ctx context.Context) *GateKeeper {
 
 	setup.Init()
 
-	filesystem.CreateDir("/tmp/gatekeeper")
+	filesystem.CreateDir(constants.RootStagingPath)
 
 	return &GateKeeper{
-		ctx:                  ctx,
-		AuthenticationModule: authentication.NewDefaultModule(),
-		runtime:              runtime.NewDefaultRuntime(),
-		Notifier:             notifier.GetNotifier(),
+		ctx:      ctx,
+		runtime:  runtime.NewDefaultRuntime(),
+		Notifier: notifier.GetNotifier(),
+		guard:    guard.NewGuard(),
 	}
-}
-
-func (g *GateKeeper) WithAuthenticationModule(authenticationModule authentication.Module) *GateKeeper {
-	g.AuthenticationModule = authenticationModule
-	return g
 }
 
 func (g *GateKeeper) WithNotifier(notifier notifier.Notifier) *GateKeeper {
@@ -47,14 +42,8 @@ func (g *GateKeeper) WithNotifier(notifier notifier.Notifier) *GateKeeper {
 	return g
 }
 
-func (g *GateKeeper) authenticate() {
-	if authenticated, err := g.AuthenticationModule.IsAuthenticated(g.ctx); !authenticated {
-		panic(err)
-	}
-}
-
 func (g *GateKeeper) Run(plan, option string) {
-	g.authenticate()
+	g.guard.Verify(g.ctx, plan, option)
 
 	g.runtime.Prepare(g.ctx, plan, option)
 

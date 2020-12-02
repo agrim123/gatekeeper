@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/agrim123/gatekeeper/internal/gatekeeper"
+	"github.com/agrim123/gatekeeper/pkg/logger"
 	"github.com/agrim123/gatekeeper/pkg/utils"
 	"github.com/spf13/cobra"
 )
@@ -25,6 +26,8 @@ var runPlanCmd = &cobra.Command{
 		g := gatekeeper.NewGatekeeper(utils.AttachExecutingUserToCtx(context.Background()))
 
 		switch len(args) {
+		case 0:
+			logger.Fatal("Invalid arguments")
 		case 1:
 			g.Run(args[0], "")
 		default:
