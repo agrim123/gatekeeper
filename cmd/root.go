@@ -35,8 +35,38 @@ var runPlanCmd = &cobra.Command{
 	},
 }
 
+var listCmd = &cobra.Command{
+	Use:   "list",
+	Short: "Lists all commands the user can run",
+	Long:  ``,
+	Run: func(cmd *cobra.Command, args []string) {
+
+	},
+}
+
+var selfCmd = &cobra.Command{
+	Use:   "self",
+	Short: "Gatekeeper management commands",
+	Long:  ``,
+	Run: func(cmd *cobra.Command, args []string) {
+
+	},
+}
+
+var selfUpdateCmd = &cobra.Command{
+	Use:   "update",
+	Short: "Updates gatekeeper code",
+	Long:  ``,
+	Run: func(cmd *cobra.Command, args []string) {
+
+	},
+}
+
 func init() {
 	rootCmd.AddCommand(runPlanCmd)
+	rootCmd.AddCommand(listCmd)
+	rootCmd.AddCommand(selfCmd)
+	selfCmd.AddCommand(selfUpdateCmd)
 }
 
 func Execute() {
