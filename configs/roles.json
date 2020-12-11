@@ -1,15 +1,15 @@
 {
     "roles": [
         {
-            "name": "service1-admin",
+            "name": "service1-owner",
             "allowed_plans": [
                 "*"
             ]
         },
         {
-            "name": "service1-read",
+            "name": "service1-deploy",
             "allowed_plans": [
-                "service1.status"
+                "service1.deploy"
             ]
         }
     ]
