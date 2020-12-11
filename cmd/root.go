@@ -10,6 +10,7 @@ import (
 	"github.com/agrim123/gatekeeper/internal/pkg/setup"
 	"github.com/agrim123/gatekeeper/internal/pkg/store"
 	"github.com/agrim123/gatekeeper/pkg/config"
+	"github.com/agrim123/gatekeeper/pkg/logger"
 	"github.com/agrim123/gatekeeper/pkg/utils"
 	"github.com/spf13/cobra"
 )
@@ -46,6 +47,11 @@ var listCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := utils.AttachExecutingUserToCtx(context.Background())
 		allowedCmds := store.GetAllowedCommands(ctx.Value(constants.UserContextKey).(string))
+		if len(allowedCmds) == 0 {
+			logger.Info("No allowed commands")
+			return
+		}
+
 		for plan, options := range allowedCmds {
 			fmt.Println(plan)
 			for _, opt := range options {
