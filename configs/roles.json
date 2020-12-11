@@ -3,7 +3,7 @@
         {
             "name": "service1-admin",
             "allowed_plans": [
-                "service1.*"
+                "*"
             ]
         },
         {

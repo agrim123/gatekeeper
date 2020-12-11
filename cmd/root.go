@@ -5,7 +5,11 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/agrim123/gatekeeper/internal/constants"
 	"github.com/agrim123/gatekeeper/internal/gatekeeper"
+	"github.com/agrim123/gatekeeper/internal/pkg/setup"
+	"github.com/agrim123/gatekeeper/internal/pkg/store"
+	"github.com/agrim123/gatekeeper/pkg/config"
 	"github.com/agrim123/gatekeeper/pkg/utils"
 	"github.com/spf13/cobra"
 )
@@ -40,7 +44,14 @@ var listCmd = &cobra.Command{
 	Short: "Lists all commands the user can run",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-
+		ctx := utils.AttachExecutingUserToCtx(context.Background())
+		allowedCmds := store.GetAllowedCommands(ctx.Value(constants.UserContextKey).(string))
+		for plan, options := range allowedCmds {
+			fmt.Println(plan)
+			for _, opt := range options {
+				fmt.Println("    " + opt)
+			}
+		}
 	},
 }
 
@@ -70,6 +81,10 @@ func init() {
 }
 
 func Execute() {
+	config.Init()
+
+	setup.Init()
+
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)

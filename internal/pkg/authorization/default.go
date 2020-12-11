@@ -3,7 +3,6 @@ package authorization
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/agrim123/gatekeeper/internal/constants"
 	"github.com/agrim123/gatekeeper/internal/pkg/store"
@@ -25,29 +24,8 @@ func (dm DefaultModule) IsAuthorized(ctx context.Context, plan, option string) (
 	}
 
 	allowedOptions := make([]string, 0)
-	for _, role := range store.Users[ctx.Value(constants.UserContextKey).(string)].Roles {
-		for _, p := range store.Roles[role].AllowedPlans {
-			if p == "*" {
-				return true, nil
-			}
-
-			if strings.Contains(p, ".*") {
-				for opt := range store.Plans[plan].Opts {
-					allowedOptions = append(allowedOptions, opt)
-				}
-
-				continue
-			}
-
-			allowedPlan := strings.Split(p, ".")
-			if len(allowedPlan) != 2 {
-				continue
-			}
-
-			if allowedPlan[0] == plan {
-				allowedOptions = append(allowedOptions, allowedPlan[1])
-			}
-		}
+	if value, ok := store.GetAllowedCommands(ctx.Value(constants.UserContextKey).(string))[plan]; ok {
+		allowedOptions = value
 	}
 
 	if option == "" {

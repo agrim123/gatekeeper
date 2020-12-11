@@ -9,8 +9,6 @@ import (
 	"github.com/agrim123/gatekeeper/internal/gatekeeper/runtime"
 	"github.com/agrim123/gatekeeper/internal/pkg/filesystem"
 	"github.com/agrim123/gatekeeper/internal/pkg/notifier"
-	"github.com/agrim123/gatekeeper/internal/pkg/setup"
-	"github.com/agrim123/gatekeeper/pkg/config"
 )
 
 type GateKeeper struct {
@@ -23,10 +21,6 @@ type GateKeeper struct {
 }
 
 func NewGatekeeper(ctx context.Context) *GateKeeper {
-	config.Init()
-
-	setup.Init()
-
 	filesystem.CreateDir(constants.RootStagingPath)
 
 	return &GateKeeper{
