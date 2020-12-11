@@ -64,10 +64,6 @@ var listCmd = &cobra.Command{
 var selfCmd = &cobra.Command{
 	Use:   "self",
 	Short: "Gatekeeper management commands",
-	Long:  ``,
-	Run: func(cmd *cobra.Command, args []string) {
-
-	},
 }
 
 var selfUpdateCmd = &cobra.Command{
@@ -75,7 +71,7 @@ var selfUpdateCmd = &cobra.Command{
 	Short: "Updates gatekeeper code",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-
+		logger.Error("TODO")
 	},
 }
 
