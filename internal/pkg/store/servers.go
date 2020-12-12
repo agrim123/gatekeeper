@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/agrim123/gatekeeper/internal/constants"
-	"github.com/agrim123/gatekeeper/internal/pkg/filesystem"
-	"github.com/agrim123/gatekeeper/internal/pkg/filesystem/archive"
+	"github.com/agrim123/gatekeeper/pkg/filesystem"
+	"github.com/agrim123/gatekeeper/pkg/filesystem/archive"
 	"github.com/agrim123/gatekeeper/pkg/services/remote"
 	"github.com/spf13/viper"
 )

@@ -67,6 +67,29 @@ Every step is focused to be pluggable to provide ease of integrating your own me
 
 Gatekeeper provides basic authentication, authorization and notifier (default is slack, confirgured by slack webhook in confg.toml, and a fallback to stdout) modules. However, this can easily be customized by adding your own methods and passing them to gatekeeper on initialization.
 
+## Usage
+
+```bash
+$ gatekeeper
+Gatekeeper is an authentication and authorization oriented deployment and access managment tool.
+
+Usage:
+  gatekeeper [command]
+
+Available Commands:
+  help        Help about any command
+  list        Lists all commands the user can run
+  run-plan    Runs the specified plan with given option
+  self        Gatekeeper management commands
+
+Flags:
+  -h, --help   help for gatekeeper
+
+Use "gatekeeper [command] --help" for more information about a command.
+```
+
+The `run-plan` command runs the plan defined in `plans.json`.
+
 ## TODO
 
 - [ ] see infra health (read-only)
