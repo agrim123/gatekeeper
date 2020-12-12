@@ -68,12 +68,12 @@ func Init() {
 		store.Groups[group.Name] = group
 	}
 
-	var users []store.AccessMapping
+	var users []store.User
 	usersByteData, _ := json.Marshal(viper.Get("users"))
 	json.Unmarshal(usersByteData, &users)
 
-	store.Users = make(map[string]store.AccessMapping)
+	store.Users = make(map[string]store.User)
 	for _, user := range users {
-		store.Users[user.User.Email] = user
+		store.Users[user.User.Username] = user
 	}
 }

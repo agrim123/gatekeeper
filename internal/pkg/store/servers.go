@@ -45,7 +45,7 @@ func (s *Server) NormalizeInstancesPrivateKeys() {
 	instances := make([]*Instance, len(s.Instances))
 
 	for i, instance := range s.Instances {
-		instance.NormalizePrivateKeyPath()
+		instance.normalizePrivateKeyPath()
 		instances[i] = instance
 	}
 
@@ -61,6 +61,6 @@ func (i *Instance) Run(cmds []string) error {
 	return nil
 }
 
-func (i *Instance) NormalizePrivateKeyPath() {
+func (i *Instance) normalizePrivateKeyPath() {
 	i.PrivateKey = filepath.Join(viper.GetString("basepath"), i.PrivateKey)
 }

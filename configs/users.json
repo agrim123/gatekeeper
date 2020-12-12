@@ -2,7 +2,8 @@
     "users": [
         {
             "user": {
-                "email": "agrim"
+                "username": "agrim",
+                "team": "service1"
             },
             "groups": [
                 "service1-owner"

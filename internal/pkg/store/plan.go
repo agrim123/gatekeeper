@@ -83,5 +83,6 @@ func GetAvailablePlans() []string {
 		plans[i] = plan
 		i++
 	}
+
 	return plans
 }

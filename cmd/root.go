@@ -82,9 +82,13 @@ func init() {
 	selfCmd.AddCommand(selfUpdateCmd)
 }
 
+// Execute is the entrypoint of gatekeeper
 func Execute() {
+	// load configs to memory
 	config.Init()
 
+	// Using the configs loaded above populate
+	// the variables to be used by gatekeeper
 	setup.Init()
 
 	if err := rootCmd.Execute(); err != nil {
