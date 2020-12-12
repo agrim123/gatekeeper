@@ -37,7 +37,12 @@ The roles are delegated inside gatekeeper for various tasks. The hierarchy is:
 ```
 gatekeeper
  |__ guard
+ |   |__ authentication
+ |   |__ authorization
  |__ runtime
+ |   |__ executes based on type  ->--status is returned-->|
+ |__ notifier         <-----------------------------------|
+     |__ defaults to stdout
 ```
 
 Gatekeeper is reponsible for calling `guard`, `runtime` and `notifier`. After executing the requested instrctions, the returned status is then notified to the users via `notifier` module. Gatekeeper initializes all the three to default when it is initialized,
