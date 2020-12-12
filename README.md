@@ -31,6 +31,37 @@ Ideal situation is to put all keys on bastion server, and have users access requ
 
 We use `chmod +s gatekeeper` so that the non root user executing the binary, can use (not access, not read) the protected private key on behalf of the root user.
 
+## Architecture
+
+The roles are delegated inside gatekeeper for various tasks. The hierarchy is:
+```
+gatekeeper
+ |__ guard
+ |__ runtime
+```
+
+Gatekeeper is reponsible for calling `guard`, `runtime` and `notifier`. After executing the requested instrctions, the returned status is then notified to the users via `notifier` module. Gatekeeper initializes all the three to default when it is initialized,
+```golang
+    &GateKeeper{
+		ctx:      ctx,
+		runtime:  runtime.NewDefaultRuntime(),
+		notifier: notifier.GetNotifier(),
+		guard:    guard.NewGuard(),
+	}
+```
+
+The guard is responsible for authentication and authorizing the user and the command it the user is requesting.
+
+After guard verifies the user, the command is passed to runtime for execution. The required action is taken based on type of command.
+
+After execution, whether success or failure, the status is returned back to gatekeeper, which then calls the notifier to inform the user of the result.
+
+Every step is focused to be pluggable to provide ease of integrating your own methods.
+
+### Pluggable modules
+
+Gatekeeper provides basic authentication, authorization and notifier (default is slack, confirgured by slack webhook in confg.toml, and a fallback to stdout) modules. However, this can easily be customized by adding your own methods and passing them to gatekeeper on initialization.
+
 ## TODO
 
 - [ ] see infra health (read-only)
