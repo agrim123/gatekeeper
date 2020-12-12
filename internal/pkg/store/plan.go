@@ -29,8 +29,8 @@ func (p Plan) GetOptions() []string {
 func GetAllowedCommands(user string) map[string][]string {
 	cmds := make(map[string][]string)
 
-	for _, role := range Users[user].Roles {
-		for _, p := range Roles[role].AllowedPlans {
+	for _, group := range Users[user].Groups {
+		for _, p := range Groups[group].AllowedPlans {
 			options := []string{}
 			if p == "*" {
 				for pp := range Plans {

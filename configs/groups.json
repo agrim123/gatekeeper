@@ -1,5 +1,5 @@
 {
-    "roles": [
+    "groups": [
         {
             "name": "service1-owner",
             "allowed_plans": [

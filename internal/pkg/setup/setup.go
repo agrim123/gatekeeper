@@ -59,13 +59,13 @@ func Init() {
 		store.Plans[plan.Name] = plan
 	}
 
-	var roles []store.Role
-	rolesByteData, _ := json.Marshal(viper.Get("roles"))
-	json.Unmarshal(rolesByteData, &roles)
+	var groups []store.Group
+	groupsByteData, _ := json.Marshal(viper.Get("groups"))
+	json.Unmarshal(groupsByteData, &groups)
 
-	store.Roles = make(map[string]store.Role)
-	for _, role := range roles {
-		store.Roles[role.Name] = role
+	store.Groups = make(map[string]store.Group)
+	for _, group := range groups {
+		store.Groups[group.Name] = group
 	}
 
 	var users []store.AccessMapping

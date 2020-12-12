@@ -16,7 +16,7 @@ func Init() {
 	viper.SetConfigName("users")
 	viper.MergeInConfig()
 
-	viper.SetConfigName("roles")
+	viper.SetConfigName("groups")
 	viper.MergeInConfig()
 
 	viper.SetConfigName("plan")

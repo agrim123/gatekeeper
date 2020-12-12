@@ -15,12 +15,12 @@ Authentication and authorization oriented tool for allowing users to ssh a remot
 - Next important file is `servers.json`.
     - Each server has a set of instances which contain the username, ip and private key path required to ssh into the instance.
     - The keys can be put in relative path to gatekeeper binary in `keys` folder.
-- Since, gatekeeper is entirely relies on authentication and authorization of user running the command, the `roles.json` and `users.json` are  critical configurations to gatekeeper working.
-    - Every user is assigned some roles which in turn have `allowed_plans` that can be run by users in that role.
+- Since, gatekeeper is entirely relies on authentication and authorization of user running the command, the `groups.json` and `users.json` are  critical configurations to gatekeeper working.
+    - Every user is assigned some groups which in turn have `allowed_plans` that can be run by users in that group.
         - The allowed plans format is `plan.option`, for example, user_service.deploy.
         - Special cases:
-            - Role `*` defines root privileges. This role has access to every plan, and can run any option.
-            - Role `plan.*` gives access to all options of the plan.
+            - Group `*` defines root privileges. This group has access to every plan, and can run any option.
+            - Group `plan.*` gives access to all options of the plan.
     - Usernames are mapped to system users, so this gives an extra security layer, since user cannot spoof its own system user name.
 - IMP: gatekeeper cannot be run by root user. Instead we run the gatekeeper binary using `+s`.
 
