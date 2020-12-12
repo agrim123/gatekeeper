@@ -25,14 +25,14 @@ type Remote struct {
 func (r *Remote) RunCommands(cmds []string) {
 	sess, err := r.Client.NewSession()
 	if err != nil {
-		logger.Fatalf("Failed to create session: ", err)
+		logger.Fatal("Failed to create session: ", err)
 	}
 	defer sess.Close()
 
 	// StdinPipe for commands
 	stdin, err := sess.StdinPipe()
 	if err != nil {
-		logger.Fatalf("Failed", err)
+		logger.Fatal("Failed", err)
 	}
 
 	// Enable system stdout
@@ -43,13 +43,13 @@ func (r *Remote) RunCommands(cmds []string) {
 	// Start remote shell
 	err = sess.Shell()
 	if err != nil {
-		logger.Fatalf("Failed", err)
+		logger.Fatal("Failed", err)
 	}
 
 	for _, cmd := range cmds {
 		_, err = fmt.Fprintf(stdin, "%s\n", cmd)
 		if err != nil {
-			logger.Fatalf("Failed", err)
+			logger.Fatal("Failed", err)
 		}
 	}
 
@@ -61,7 +61,7 @@ func (r *Remote) RunCommands(cmds []string) {
 }
 
 func (r *Remote) RunCommand(cmd string) {
-	logger.Infof("Running `%s`", cmd)
+	logger.Info("Running `%s`", cmd)
 	sess, err := r.Client.NewSession()
 	if err != nil {
 		panic(err)
@@ -91,7 +91,7 @@ func (r *Remote) RunCommand(cmd string) {
 func (r *Remote) MakeNewConnection() {
 	connection, err := ssh.Dial("tcp", r.address, &r.Config)
 	if err != nil {
-		logger.Fatalf("Failed to dial. Error: %s", err.Error())
+		logger.Fatal("Failed to dial. Error: %s", err.Error())
 	}
 
 	r.Client = connection
@@ -101,7 +101,7 @@ func (r *Remote) SpawnShell() error {
 	session, _ := r.Client.NewSession()
 
 	if err := setupPty(session); err != nil {
-		logger.Errorf("Failed to set up pseudo terminal. Error: %s", err.Error())
+		logger.Error("Failed to set up pseudo terminal. Error: %s", err.Error())
 		return err
 	}
 
@@ -119,7 +119,7 @@ func (r *Remote) SpawnShell() error {
 	session.Stderr = os.Stderr
 
 	if err := session.Shell(); err != nil {
-		logger.Errorf("Failed to start interactive shell. Error: %s", err.Error())
+		logger.Error("Failed to start interactive shell. Error: %s", err.Error())
 		return err
 	}
 	return session.Wait()

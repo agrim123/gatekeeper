@@ -44,6 +44,7 @@ func verifyPrivateKeyPermissions(privateKey string) error {
 }
 
 func publicKeyFile(file string) (ssh.AuthMethod, error) {
+	logger.InfofL("Reading private key")
 	if err := verifyPrivateKeyPermissions(file); err != nil {
 		return nil, err
 	}
@@ -71,7 +72,7 @@ func setupPty(session *ssh.Session) error {
 
 	if err := session.RequestPty("xterm", 80, 40, modes); err != nil {
 		session.Close()
-		logger.Errorf("Request for pseudo terminal failed. Error: %s", err.Error())
+		logger.Error("Request for pseudo terminal failed. Error: %s", err.Error())
 		return err
 	}
 	return nil

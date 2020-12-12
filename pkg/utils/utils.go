@@ -21,7 +21,7 @@ func getExecutingUser() string {
 
 	// TODO: [Fix] Not an enforcable check
 	if os.Getenv("SUDO_USER") != "" {
-		logger.Fatalf("Please run as non-sudo. Current real user: %s", logger.Bold(os.Getenv("SUDO_USER")))
+		logger.Fatal("Please run as non-sudo. Current real user: %s", logger.Bold(os.Getenv("SUDO_USER")))
 	}
 
 	return user.Username

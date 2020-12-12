@@ -54,7 +54,7 @@ func (c *Container) normalizeMounts() {
 	for src, dst := range c.Mounts {
 		// ignore non existent paths
 		if !filesystem.DoesExists(src) {
-			logger.Warnf("Path %s not found. Not mounting", src)
+			logger.Warn("Path %s not found. Not mounting", src)
 			continue
 		}
 
@@ -105,7 +105,7 @@ func (c *Container) Create() error {
 
 	c.ID = resp.ID
 	if len(resp.Warnings) > 0 {
-		logger.Warnf("Warnings while creating the container: %v", resp.Warnings)
+		logger.Warn("Warnings while creating the container: %v", resp.Warnings)
 	}
 
 	return nil
@@ -150,7 +150,7 @@ func (c *Container) runStage(ctx context.Context, cli *client.Client, stage Stag
 		return err
 	}
 
-	logger.Infof("%s %s", logger.Bold("Output:"), b)
+	logger.Info("%s %s", logger.Bold("Output:"), b)
 	return nil
 }
 
@@ -158,9 +158,9 @@ func (c *Container) runStages(ctx context.Context, cli *client.Client) error {
 	for _, stage := range c.Stages {
 		err := c.runStage(ctx, cli, stage)
 		if err != nil {
-			logger.Errorf("Stage `%s` failed. Error: %s", logger.Bold(stage.String()), err.Error())
+			logger.Error("Stage `%s` failed. Error: %s", logger.Bold(stage.String()), err.Error())
 		} else {
-			logger.Successf("Stage `%s` completed", logger.Bold(stage.String()))
+			logger.Success("Stage `%s` completed", logger.Bold(stage.String()))
 		}
 	}
 
@@ -190,7 +190,7 @@ func (c *Container) Start(ctx context.Context) error {
 	}
 
 	if err := cli.ContainerStart(ctx, c.ID, types.ContainerStartOptions{}); err != nil {
-		logger.Errorf("Error while starting the container: %s", err.Error())
+		logger.Error("Error while starting the container: %s", err.Error())
 		return err
 	}
 
@@ -221,11 +221,11 @@ func (c *Container) Stop() error {
 	err = cli.ContainerStop(context.Background(), c.ID, &containerTimeout)
 	if err != nil {
 		if err != nil {
-			logger.Errorf("Unable to stop container: %s, Error: %s", c.ID, err.Error())
+			logger.Error("Unable to stop container: %s, Error: %s", c.ID, err.Error())
 		}
 		return err
 	}
-	logger.Infof("Stopped container: %s", logger.Bold(c.ID))
+	logger.Info("Stopped container: %s", logger.Bold(c.ID))
 
 	return nil
 }
@@ -237,14 +237,14 @@ func (c *Container) Remove() error {
 		return err
 	}
 
-	logger.Infof("Removing container: %s", logger.Bold(c.ID))
+	logger.Info("Removing container: %s", logger.Bold(c.ID))
 	err = cli.ContainerRemove(context.Background(), c.ID, types.ContainerRemoveOptions{
 		RemoveVolumes: true,
 		Force:         true,
 	})
 
 	if err != nil {
-		logger.Errorf("Unable to remove container: %s, Error: %s", c.ID, err.Error())
+		logger.Error("Unable to remove container: %s, Error: %s", c.ID, err.Error())
 	}
 
 	return err

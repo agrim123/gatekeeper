@@ -32,10 +32,10 @@ func (s Shell) Run() error {
 	if len(server.Instances) > 1 {
 		choice := 0
 		for {
-			logger.Infof("Multiple instances present in the cluster.")
+			logger.Info("Multiple instances present in the cluster.")
 
 			for index, ins := range server.Instances {
-				logger.Infof("[ %d ] %s", index, ins.String())
+				logger.Info("[ %d ] %s", index, ins.String())
 			}
 			choice, _ = strconv.Atoi(logger.InfoScan("Choose which one to use: "))
 			if choice < len(server.Instances) {
@@ -43,11 +43,11 @@ func (s Shell) Run() error {
 				break
 			}
 
-			logger.Errorf("Invalid choice %d", choice)
+			logger.Error("Invalid choice %d", choice)
 		}
 	}
 
-	logger.Infof("Spawning shell for %s", logger.Bold(instance.String()))
+	logger.Info("Spawning shell for %s", logger.Bold(instance.String()))
 
 	r := remote.NewRemoteConnection(instance.User, instance.IP, instance.Port, instance.PrivateKey)
 	r.MakeNewConnection()
@@ -66,7 +66,7 @@ func (r Remote) Run() error {
 	server := Servers[r.Server]
 
 	for _, instance := range server.Instances {
-		logger.Infof("Running stages on %s", logger.Bold(instance.String()))
+		logger.Info("Running stages on %s", logger.Bold(instance.String()))
 		instance.Run(r.Stages)
 	}
 

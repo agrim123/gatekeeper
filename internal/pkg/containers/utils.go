@@ -30,7 +30,7 @@ func RemoveContainerIfExistsByName(ctx context.Context, containerName string) {
 	})
 
 	if len(containers) > 0 {
-		logger.Warnf("Found %d existing containers. %s", len(containers), logger.Bold("These will be removed"))
+		logger.Warn("Found %d existing containers. %s", len(containers), logger.Bold("These will be removed"))
 	}
 
 	for _, container := range containers {
