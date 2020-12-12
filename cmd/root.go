@@ -17,7 +17,7 @@ import (
 
 var rootCmd = &cobra.Command{
 	Use:   "gatekeeper",
-	Short: "Gatekeeper is your authentication and authorization oriented deployment and access managment tool.",
+	Short: "Gatekeeper is an authentication and authorization oriented deployment and access managment tool.",
 	Long:  ``,
 }
 
