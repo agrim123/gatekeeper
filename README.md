@@ -1,6 +1,6 @@
 # gatekeeper
 
-Authentication and authorization oriented tool for allowing users to ssh a remote machine without giving them access to private keys.
+Authentication and authorization oriented tool allowing non-root users to ssh to a machine without giving them access to private keys.
 
 ## Setup
 
