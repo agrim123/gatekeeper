@@ -52,6 +52,7 @@ func (s Shell) Run() error {
 	r := remote.NewRemoteConnection(instance.User, instance.IP, instance.Port, instance.PrivateKey)
 	r.MakeNewConnection()
 	r.SpawnShell()
+	r.Close()
 
 	return nil
 }

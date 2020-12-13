@@ -60,6 +60,7 @@ func (r *Remote) RunCommands(cmds []string) {
 	}
 }
 
+// RunCommand runs a single command over a ssh connection
 func (r *Remote) RunCommand(cmd string) {
 	logger.Info("Running `%s`", cmd)
 	sess, err := r.Client.NewSession()
@@ -88,15 +89,18 @@ func (r *Remote) RunCommand(cmd string) {
 	}
 }
 
+// MakeNewConnection initiates new ssh connection to given host
 func (r *Remote) MakeNewConnection() {
 	connection, err := ssh.Dial("tcp", r.address, &r.Config)
 	if err != nil {
-		logger.Fatal("Failed to dial. Error: %s", err.Error())
+		logger.Fatal("Failed to connect to %s. Error: %s", r.address, err.Error())
 	}
 
 	r.Client = connection
 }
 
+// SpawnShell spwans shell on remote machine
+// Ctrl-C exits the shell
 func (r *Remote) SpawnShell() error {
 	session, _ := r.Client.NewSession()
 
@@ -122,9 +126,11 @@ func (r *Remote) SpawnShell() error {
 		logger.Error("Failed to start interactive shell. Error: %s", err.Error())
 		return err
 	}
+
 	return session.Wait()
 }
 
+// Close closes the ssh connection
 func (r *Remote) Close() error {
 	return r.Client.Close()
 }

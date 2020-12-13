@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"time"
 
 	"github.com/agrim123/gatekeeper/pkg/logger"
 	"golang.org/x/crypto/ssh"
 )
 
 func NewRemoteConnection(user, ip, port, privateKey string) *Remote {
-	pubkey, err := publicKeyFile(privateKey)
+	pubkey, err := getPubKeyAuthMethod(privateKey)
 	if err != nil {
 		panic(err)
 	}
@@ -22,6 +23,7 @@ func NewRemoteConnection(user, ip, port, privateKey string) *Remote {
 				pubkey,
 			},
 			HostKeyCallback: ssh.InsecureIgnoreHostKey(), // TODO: change
+			Timeout:         5 * time.Second,
 		},
 		address: ip + ":" + port,
 	}
@@ -43,7 +45,7 @@ func verifyPrivateKeyPermissions(privateKey string) error {
 	return fmt.Errorf("Check private key: '%s' permissions. Have %v, want %v", privateKey, info.Mode(), os.FileMode(allowedPerm))
 }
 
-func publicKeyFile(file string) (ssh.AuthMethod, error) {
+func getPubKeyAuthMethod(file string) (ssh.AuthMethod, error) {
 	logger.InfofL("Reading private key")
 	if err := verifyPrivateKeyPermissions(file); err != nil {
 		return nil, err
