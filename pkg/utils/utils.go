@@ -13,6 +13,26 @@ func AttachExecutingUserToCtx(ctx context.Context) context.Context {
 	return context.WithValue(ctx, constants.UserContextKey, getExecutingUser())
 }
 
+func AttachPlanToCtx(ctx context.Context, plan string) context.Context {
+	return context.WithValue(ctx, constants.PlanContextKey, plan)
+}
+
+func AttachOptionToCtx(ctx context.Context, option string) context.Context {
+	return context.WithValue(ctx, constants.OptionContextKey, option)
+}
+
+func GetUsernameFromCtx(ctx context.Context) string {
+	return ctx.Value(constants.UserContextKey).(string)
+}
+
+func GetPlanFromCtx(ctx context.Context) string {
+	return ctx.Value(constants.PlanContextKey).(string)
+}
+
+func GetOptionFromCtx(ctx context.Context) string {
+	return ctx.Value(constants.OptionContextKey).(string)
+}
+
 func getExecutingUser() string {
 	user, err := user.Current()
 	if err != nil {

@@ -1,8 +1,10 @@
 package constants
 
-type UserContextKeyType string
+type ContextKeyType string
 
-var UserContextKey UserContextKeyType = "ctx_username"
+var UserContextKey ContextKeyType = "ctx_username"
+var PlanContextKey ContextKeyType = "ctx_plan"
+var OptionContextKey ContextKeyType = "ctx_option"
 
 const (
 	RootStagingPath           = "/tmp/gatekeeper/"

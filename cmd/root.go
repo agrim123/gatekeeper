@@ -26,16 +26,28 @@ var runPlanCmd = &cobra.Command{
 	Long: `Runs plans defined in plan.json. Also takes an option as second argument.
 			For example: gatekeeper run-plan user_service deploy`,
 	Run: func(cmd *cobra.Command, args []string) {
-		g := gatekeeper.NewGatekeeper(utils.AttachExecutingUserToCtx(context.Background()))
-
+		plan := ""
+		option := ""
 		switch len(args) {
 		case 0:
-			g.Run("", "")
 		case 1:
-			g.Run(args[0], "")
+			plan = args[0]
 		default:
-			g.Run(args[0], args[1])
+			plan = args[0]
+			option = args[1]
 		}
+
+		ctx := utils.AttachOptionToCtx(
+			utils.AttachPlanToCtx(
+				utils.AttachExecutingUserToCtx(
+					context.Background(),
+				),
+				plan,
+			),
+			option,
+		)
+
+		gatekeeper.NewGatekeeper(ctx).Run(plan, option)
 	},
 }
 
