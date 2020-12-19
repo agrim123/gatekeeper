@@ -16,15 +16,15 @@ func NewDefaultModule() *DefaultModule {
 
 func (dm DefaultModule) IsAuthorized(ctx context.Context, plan, option string) (bool, error) {
 	if plan == "" {
-		return false, fmt.Errorf("No plan specfied. Available plans: %v", store.GetAvailablePlans())
+		return false, fmt.Errorf("No plan specfied. Available plans: %v", store.Store.GetAvailablePlans())
 	}
 
-	if _, ok := store.Plans[plan]; !ok {
-		return false, fmt.Errorf("Invalid plan specfied. Available plans: %v", store.GetAvailablePlans())
+	if _, ok := store.Store.Plans[plan]; !ok {
+		return false, fmt.Errorf("Invalid plan specfied. Available plans: %v", store.Store.GetAvailablePlans())
 	}
 
 	allowedOptions := make([]string, 0)
-	if value, ok := store.GetAllowedCommands(ctx.Value(constants.UserContextKey).(string))[plan]; ok {
+	if value, ok := store.Store.GetAllowedCommands(ctx.Value(constants.UserContextKey).(string))[plan]; ok {
 		allowedOptions = value
 	}
 

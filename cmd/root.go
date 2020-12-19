@@ -7,7 +7,6 @@ import (
 
 	"github.com/agrim123/gatekeeper/internal/constants"
 	"github.com/agrim123/gatekeeper/internal/gatekeeper"
-	"github.com/agrim123/gatekeeper/internal/pkg/setup"
 	"github.com/agrim123/gatekeeper/internal/pkg/store"
 	"github.com/agrim123/gatekeeper/pkg/config"
 	"github.com/agrim123/gatekeeper/pkg/logger"
@@ -46,7 +45,8 @@ var listCmd = &cobra.Command{
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := utils.AttachExecutingUserToCtx(context.Background())
-		allowedCmds := store.GetAllowedCommands(ctx.Value(constants.UserContextKey).(string))
+		store.Init()
+		allowedCmds := store.Store.GetAllowedCommands(ctx.Value(constants.UserContextKey).(string))
 		if len(allowedCmds) == 0 {
 			logger.Info("No allowed commands")
 			return
@@ -86,10 +86,6 @@ func init() {
 func Execute() {
 	// load configs to memory
 	config.Init()
-
-	// Using the configs loaded above populate
-	// the variables to be used by gatekeeper
-	setup.Init()
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)

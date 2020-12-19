@@ -26,15 +26,15 @@ func (p Plan) GetOptions() []string {
 
 // GetAllowedCommands returns the allowed options for plans allowed for user
 // returned format map[plan_name][array of options]
-func GetAllowedCommands(user string) map[string][]string {
+func (s *StoreStruct) GetAllowedCommands(user string) map[string][]string {
 	cmds := make(map[string][]string)
 
-	for _, group := range Users[user].Groups {
-		for _, p := range Groups[group].AllowedPlans {
+	for _, group := range s.Users[user].Groups {
+		for _, p := range s.Groups[group].AllowedPlans {
 			options := []string{}
 			if p == "*" {
-				for pp := range Plans {
-					for po := range Plans[pp].Opts {
+				for pp := range s.Plans {
+					for po := range s.Plans[pp].Opts {
 						options = append(options, po)
 					}
 
@@ -57,7 +57,7 @@ func GetAllowedCommands(user string) map[string][]string {
 			option := allowedPlan[1]
 
 			if option == "*" {
-				for po := range Plans[plan].Opts {
+				for po := range s.Plans[plan].Opts {
 					options = append(options, po)
 				}
 			} else {
@@ -75,11 +75,11 @@ func GetAllowedCommands(user string) map[string][]string {
 	return cmds
 }
 
-func GetAvailablePlans() []string {
-	plans := make([]string, len(Plans))
+func (s *StoreStruct) GetAvailablePlans() []string {
+	plans := make([]string, len(s.Plans))
 
 	i := 0
-	for plan := range Plans {
+	for plan := range s.Plans {
 		plans[i] = plan
 		i++
 	}

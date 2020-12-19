@@ -10,11 +10,14 @@ import (
 	"github.com/agrim123/gatekeeper/internal/pkg/authentication"
 	"github.com/agrim123/gatekeeper/internal/pkg/authorization"
 	"github.com/agrim123/gatekeeper/internal/pkg/notifier"
+	"github.com/agrim123/gatekeeper/internal/pkg/store"
 	"github.com/agrim123/gatekeeper/pkg/filesystem"
 )
 
 type GateKeeper struct {
 	ctx context.Context
+
+	store *store.StoreStruct
 
 	runtime *runtime.Runtime
 	guard   *guard.Guard
@@ -26,13 +29,17 @@ type GateKeeper struct {
 func NewGatekeeper(ctx context.Context) *GateKeeper {
 	// Initializes the staging path for containers
 	filesystem.CreateDir(constants.RootStagingPath)
+	store.Init()
 
-	return &GateKeeper{
+	g := &GateKeeper{
 		ctx:      ctx,
 		runtime:  runtime.NewDefaultRuntime(),
 		notifier: notifier.GetNotifier(),
 		guard:    guard.NewGuard(),
+		store:    &store.Store,
 	}
+
+	return g
 }
 
 // WithNotifier updates the notifier module

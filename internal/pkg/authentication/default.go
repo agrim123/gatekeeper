@@ -18,7 +18,7 @@ func NewDefaultModule() *DefaultModule {
 func (dm DefaultModule) IsAuthenticated(ctx context.Context) (bool, error) {
 	username := ctx.Value(constants.UserContextKey).(string)
 
-	if _, ok := store.Users[username]; !ok {
+	if _, ok := store.Store.Users[username]; !ok {
 		return false, errors.New("Invalid user: " + username)
 	}
 

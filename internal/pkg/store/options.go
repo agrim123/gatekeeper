@@ -26,7 +26,7 @@ type Shell struct {
 }
 
 func (s Shell) Run() error {
-	server := Servers[s.Server]
+	server := Store.Servers[s.Server]
 
 	instance := server.Instances[0]
 	if len(server.Instances) > 1 {
@@ -64,7 +64,7 @@ type Remote struct {
 }
 
 func (r Remote) Run() error {
-	server := Servers[r.Server]
+	server := Store.Servers[r.Server]
 
 	for _, instance := range server.Instances {
 		logger.Info("Running stages on %s", logger.Bold(instance.String()))
@@ -113,7 +113,7 @@ func (c Container) Run() error {
 		Name:        constants.BaseContainerName,
 		Stages:      stages,
 		Mounts:      c.Volumes,
-		FilesToCopy: []string{Servers[c.Server].GetPrivateKeysTar()},
+		FilesToCopy: []string{Store.Servers[c.Server].GetPrivateKeysTar()},
 		Protected:   c.Protected,
 	}
 
@@ -124,7 +124,7 @@ func (c Container) Run() error {
 		"/home/deploy/keys",
 	}, true))
 
-	for _, instance := range Servers[c.Server].Instances {
+	for _, instance := range Store.Servers[c.Server].Instances {
 		container.AddPreStage(*containers.NewStage(
 			[]string{
 				"chmod",

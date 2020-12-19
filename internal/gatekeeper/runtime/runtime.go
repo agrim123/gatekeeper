@@ -22,5 +22,5 @@ func NewRuntime(ctx context.Context) *Runtime {
 
 func (r *Runtime) Execute(ctx context.Context, plan, option string) error {
 	logger.Info("Executing plan: %s %s", plan, option)
-	return store.Plans[plan].Opts[option].Run()
+	return store.Store.Plans[plan].Opts[option].Run()
 }
