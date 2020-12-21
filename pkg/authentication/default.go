@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 
+	"github.com/agrim123/gatekeeper/internal/pkg/utils"
 	"github.com/agrim123/gatekeeper/internal/store"
 	"github.com/agrim123/gatekeeper/pkg/logger"
-	"github.com/agrim123/gatekeeper/pkg/utils"
 )
 
 type DefaultModule struct{}

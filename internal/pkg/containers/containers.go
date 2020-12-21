@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/agrim123/gatekeeper/pkg/filesystem"
+	"github.com/agrim123/gatekeeper/internal/pkg/filesystem"
 	"github.com/agrim123/gatekeeper/pkg/logger"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"

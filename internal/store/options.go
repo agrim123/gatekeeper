@@ -11,8 +11,8 @@ import (
 
 	"github.com/agrim123/gatekeeper/internal/constants"
 	"github.com/agrim123/gatekeeper/internal/pkg/containers"
+	"github.com/agrim123/gatekeeper/internal/pkg/services/remote"
 	"github.com/agrim123/gatekeeper/pkg/logger"
-	"github.com/agrim123/gatekeeper/pkg/services/remote"
 )
 
 type Option interface {
