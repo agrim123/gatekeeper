@@ -5,8 +5,8 @@ import (
 	"errors"
 
 	"github.com/agrim123/gatekeeper/internal/constants"
-	"github.com/agrim123/gatekeeper/internal/pkg/store"
 	"github.com/agrim123/gatekeeper/pkg/logger"
+	"github.com/agrim123/gatekeeper/pkg/store"
 )
 
 type DefaultModule struct{}
