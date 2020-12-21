@@ -2,11 +2,9 @@ package store
 
 import (
 	"encoding/json"
-
-	"github.com/spf13/viper"
 )
 
-var Store StoreStruct
+var Store *StoreStruct
 
 type StoreStruct struct {
 	Users   map[string]User
@@ -24,41 +22,20 @@ func NewStore() *StoreStruct {
 	}
 }
 
-func Init() {
-	s := NewStore()
-	s.Initialize()
-	Store = *s
+func Init(s *StoreStruct) {
+	Store = s
 }
 
-func (s *StoreStruct) Initialize() {
-	var groups []Group
-	groupsByteData, _ := json.Marshal(viper.Get("groups"))
-	json.Unmarshal(groupsByteData, &groups)
-	s.PopulateGroups(groups)
-
-	var users []User
-	usersByteData, _ := json.Marshal(viper.Get("users"))
-	json.Unmarshal(usersByteData, &users)
-	s.PopulateUsers(users)
-
-	var servers []Server
-	serversByteData, _ := json.Marshal(viper.Get("servers"))
-	json.Unmarshal(serversByteData, &servers)
-	s.PopulateServers(servers)
-
-	var plans []Plan
-	plansByteData, _ := json.Marshal(viper.Get("plan"))
-	json.Unmarshal(plansByteData, &plans)
-	s.PopulatePlans(plans)
-}
-
-func (s *StoreStruct) PopulateServers(servers []Server) {
+func (s *StoreStruct) WithServers(servers []Server) *StoreStruct {
 	for _, server := range servers {
 		server.NormalizeInstancesPrivateKeys()
 		s.Servers[server.Name] = &server
 	}
+
+	return s
 }
-func (s *StoreStruct) PopulatePlans(plans []Plan) {
+
+func (s *StoreStruct) WithPlans(plans []Plan) *StoreStruct {
 	for _, plan := range plans {
 		finalOptions := make(map[string]Option)
 		for name, optionInterface := range plan.Options {
@@ -94,16 +71,22 @@ func (s *StoreStruct) PopulatePlans(plans []Plan) {
 
 		s.Plans[plan.Name] = plan
 	}
+
+	return s
 }
 
-func (s *StoreStruct) PopulateUsers(users []User) {
+func (s *StoreStruct) WithUsers(users []User) *StoreStruct {
 	for _, user := range users {
 		s.Users[user.User.Username] = user
 	}
+
+	return s
 }
 
-func (s *StoreStruct) PopulateGroups(groups []Group) {
+func (s *StoreStruct) WithGroups(groups []Group) *StoreStruct {
 	for _, group := range groups {
 		s.Groups[group.Name] = group
 	}
+
+	return s
 }

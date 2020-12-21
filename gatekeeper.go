@@ -26,17 +26,18 @@ type GateKeeper struct {
 }
 
 // NewGatekeeper returns new instance of gatekeeper with default modules
-func NewGatekeeper(ctx context.Context) *GateKeeper {
+func NewGatekeeper(ctx context.Context, initStore *store.StoreStruct) *GateKeeper {
 	// Initializes the staging path for containers
 	filesystem.CreateDir(constants.RootStagingPath)
-	store.Init()
+
+	store.Init(initStore)
 
 	g := &GateKeeper{
 		ctx:      ctx,
 		runtime:  runtime.NewDefaultRuntime(),
 		notifier: notifier.GetNotifier(),
 		guard:    guard.NewGuard(),
-		store:    &store.Store,
+		store:    store.Store,
 	}
 
 	return g
