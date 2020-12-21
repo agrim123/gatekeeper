@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/agrim123/gatekeeper/internal/constants"
-	"github.com/agrim123/gatekeeper/internal/pkg/authentication"
-	"github.com/agrim123/gatekeeper/internal/pkg/authorization"
+	"github.com/agrim123/gatekeeper/pkg/authentication"
+	"github.com/agrim123/gatekeeper/pkg/authorization"
 	"github.com/agrim123/gatekeeper/pkg/logger"
 )
 
