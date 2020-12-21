@@ -98,7 +98,7 @@ func (c *Container) Create() error {
 		Image: c.Image,
 		Cmd:   containerHold,
 		User:  NonRootUser,
-	}, &c.HostConfig, nil, c.Name)
+	}, &c.HostConfig, nil, nil, c.Name)
 	if err != nil {
 		return err
 	}
@@ -136,7 +136,7 @@ func (c *Container) runStage(ctx context.Context, cli *client.Client, stage Stag
 		return err
 	}
 
-	hijackResponse, err := cli.ContainerExecAttach(ctx, a.ID, types.ExecConfig{})
+	hijackResponse, err := cli.ContainerExecAttach(ctx, a.ID, types.ExecStartCheck{})
 	if err != nil {
 		return err
 	}
@@ -205,7 +205,7 @@ func (c *Container) Start(ctx context.Context) error {
 	c.runStages(ctx, cli)
 
 	// Wait for container to exit
-	_, err = cli.ContainerWait(ctx, c.ID)
+	cli.ContainerWait(ctx, c.ID, container.WaitConditionNextExit)
 
 	return err
 }
