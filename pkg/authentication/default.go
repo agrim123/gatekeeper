@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 
-	"github.com/agrim123/gatekeeper/internal/constants"
 	"github.com/agrim123/gatekeeper/pkg/logger"
 	"github.com/agrim123/gatekeeper/pkg/store"
+	"github.com/agrim123/gatekeeper/pkg/utils"
 )
 
 type DefaultModule struct{}
@@ -16,7 +16,7 @@ func NewDefaultModule() *DefaultModule {
 }
 
 func (dm DefaultModule) IsAuthenticated(ctx context.Context) (bool, error) {
-	username := ctx.Value(constants.UserContextKey).(string)
+	username := utils.GetUsernameFromCtx(ctx)
 
 	if _, ok := store.Store.Users[username]; !ok {
 		return false, errors.New("Invalid user: " + username)

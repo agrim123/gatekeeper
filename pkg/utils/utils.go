@@ -9,6 +9,15 @@ import (
 	"github.com/agrim123/gatekeeper/pkg/logger"
 )
 
+func getFromContext(ctx context.Context, key constants.ContextKeyType) string {
+	keyInterface := ctx.Value(key)
+	if keyInterface == nil {
+		logger.Fatal("Unable to extract %v from context. Aborting.", key)
+	}
+
+	return keyInterface.(string)
+}
+
 func AttachExecutingUserToCtx(ctx context.Context) context.Context {
 	return context.WithValue(ctx, constants.UserContextKey, getExecutingUser())
 }
@@ -22,15 +31,15 @@ func AttachOptionToCtx(ctx context.Context, option string) context.Context {
 }
 
 func GetUsernameFromCtx(ctx context.Context) string {
-	return ctx.Value(constants.UserContextKey).(string)
+	return getFromContext(ctx, constants.UserContextKey)
 }
 
 func GetPlanFromCtx(ctx context.Context) string {
-	return ctx.Value(constants.PlanContextKey).(string)
+	return getFromContext(ctx, constants.PlanContextKey)
 }
 
 func GetOptionFromCtx(ctx context.Context) string {
-	return ctx.Value(constants.OptionContextKey).(string)
+	return getFromContext(ctx, constants.OptionContextKey)
 }
 
 func getExecutingUser() string {

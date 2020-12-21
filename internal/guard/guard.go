@@ -46,7 +46,7 @@ func (g *Guard) authenticate() {
 }
 
 func (g *Guard) authorize(plan, option string) {
-	if authorized, err := g.authorizationModule.IsAuthorized(g.ctx); !authorized {
+	if authorized, err := g.authorizationModule.IsAuthorized(g.ctx, plan, option); !authorized {
 		logger.Fatal(err.Error())
 	} else {
 		logger.Success("Authorized `%s` to perform `%s %s`", logger.Underline(g.ctx.Value(constants.UserContextKey).(string)), plan, option)

@@ -6,7 +6,6 @@ import (
 
 	"github.com/agrim123/gatekeeper/internal/constants"
 	"github.com/agrim123/gatekeeper/pkg/store"
-	"github.com/agrim123/gatekeeper/pkg/utils"
 )
 
 type DefaultModule struct{}
@@ -15,10 +14,7 @@ func NewDefaultModule() *DefaultModule {
 	return &DefaultModule{}
 }
 
-func (dm DefaultModule) IsAuthorized(ctx context.Context) (bool, error) {
-	plan := utils.GetPlanFromCtx(ctx)
-	option := utils.GetOptionFromCtx(ctx)
-
+func (dm DefaultModule) IsAuthorized(ctx context.Context, plan, option string) (bool, error) {
 	if plan == "" {
 		return false, fmt.Errorf("No plan specfied. Available plans: %v", store.Store.GetAvailablePlans())
 	}
