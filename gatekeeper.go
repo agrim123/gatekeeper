@@ -5,12 +5,12 @@ import (
 	"fmt"
 
 	"github.com/agrim123/gatekeeper/internal/constants"
-	"github.com/agrim123/gatekeeper/internal/gatekeeper/guard"
-	"github.com/agrim123/gatekeeper/internal/gatekeeper/runtime"
+	"github.com/agrim123/gatekeeper/internal/guard"
 	"github.com/agrim123/gatekeeper/internal/pkg/authentication"
 	"github.com/agrim123/gatekeeper/internal/pkg/authorization"
 	"github.com/agrim123/gatekeeper/internal/pkg/notifier"
 	"github.com/agrim123/gatekeeper/internal/pkg/store"
+	"github.com/agrim123/gatekeeper/internal/runtime"
 	"github.com/agrim123/gatekeeper/pkg/filesystem"
 )
 
