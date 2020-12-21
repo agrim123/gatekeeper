@@ -3,8 +3,8 @@ package runtime
 import (
 	"context"
 
+	"github.com/agrim123/gatekeeper/internal/store"
 	"github.com/agrim123/gatekeeper/pkg/logger"
-	"github.com/agrim123/gatekeeper/pkg/store"
 )
 
 type Runtime struct {

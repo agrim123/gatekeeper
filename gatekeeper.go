@@ -7,11 +7,12 @@ import (
 	"github.com/agrim123/gatekeeper/internal/constants"
 	"github.com/agrim123/gatekeeper/internal/guard"
 	"github.com/agrim123/gatekeeper/internal/runtime"
+	"github.com/agrim123/gatekeeper/internal/store"
 	"github.com/agrim123/gatekeeper/pkg/authentication"
 	"github.com/agrim123/gatekeeper/pkg/authorization"
 	"github.com/agrim123/gatekeeper/pkg/filesystem"
 	"github.com/agrim123/gatekeeper/pkg/notifier"
-	"github.com/agrim123/gatekeeper/pkg/store"
+	"github.com/agrim123/gatekeeper/pkg/utils"
 )
 
 type GateKeeper struct {
@@ -26,16 +27,16 @@ type GateKeeper struct {
 }
 
 // NewGatekeeper returns new instance of gatekeeper with default modules
-func NewGatekeeper(ctx context.Context, initStore *store.StoreStruct) *GateKeeper {
+func NewGatekeeper(ctx context.Context) *GateKeeper {
 	// Initializes the staging path for containers
 	filesystem.CreateDir(constants.RootStagingPath)
 
-	store.Init(initStore)
+	ctx = utils.AttachExecutingUserToCtx(ctx)
 
 	g := &GateKeeper{
 		ctx:      ctx,
 		runtime:  runtime.NewDefaultRuntime(),
-		notifier: notifier.GetNotifier(),
+		notifier: notifier.NewDefaultNotifier(),
 		guard:    guard.NewGuard(),
 		store:    store.Store,
 	}

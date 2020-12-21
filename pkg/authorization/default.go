@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/agrim123/gatekeeper/internal/constants"
-	"github.com/agrim123/gatekeeper/pkg/store"
+	"github.com/agrim123/gatekeeper/internal/store"
 )
 
 type DefaultModule struct{}

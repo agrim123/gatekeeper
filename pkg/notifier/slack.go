@@ -44,3 +44,9 @@ func (s Slack) Notify(message string) error {
 
 	return nil
 }
+
+func NewSlackNotifier(hook string) *Slack {
+	return &Slack{
+		Hook: hook,
+	}
+}

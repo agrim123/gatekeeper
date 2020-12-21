@@ -2,91 +2,46 @@ package store
 
 import (
 	"encoding/json"
+
+	"github.com/agrim123/gatekeeper/internal/store"
+	"github.com/agrim123/gatekeeper/pkg/logger"
 )
 
-var Store *StoreStruct
-
-type StoreStruct struct {
-	Users   map[string]User
-	Groups  map[string]Group
-	Servers map[string]*Server
-	Plans   map[string]Plan
-}
-
-func NewStore() *StoreStruct {
-	return &StoreStruct{
-		Users:   make(map[string]User),
-		Groups:  make(map[string]Group),
-		Servers: make(map[string]*Server),
-		Plans:   make(map[string]Plan),
-	}
-}
-
-func Init(s *StoreStruct) {
-	Store = s
-}
-
-func (s *StoreStruct) WithServers(servers []Server) *StoreStruct {
-	for _, server := range servers {
-		server.NormalizeInstancesPrivateKeys()
-		s.Servers[server.Name] = &server
+func InitStore(users, plan, servers, groups interface{}) {
+	var groupsStruct []store.Group
+	groupsByteData, _ := json.Marshal(groups)
+	err := json.Unmarshal(groupsByteData, &groupsStruct)
+	if err != nil {
+		logger.Fatal("Unable to parse groups: %v", groups)
 	}
 
-	return s
-}
-
-func (s *StoreStruct) WithPlans(plans []Plan) *StoreStruct {
-	for _, plan := range plans {
-		finalOptions := make(map[string]Option)
-		for name, optionInterface := range plan.Options {
-			option := optionInterface.(map[string]interface{})
-
-			switch option["type"].(string) {
-			case "remote":
-				var remote Remote
-				remoteBytesdata, _ := json.Marshal(option)
-				json.Unmarshal(remoteBytesdata, &remote)
-				finalOptions[name] = remote
-			case "local":
-				var local Local
-				localBytesdata, _ := json.Marshal(option)
-				json.Unmarshal(localBytesdata, &local)
-				finalOptions[name] = local
-			case "container":
-				continue
-				var container Container
-				containerBytesdata, _ := json.Marshal(option)
-				json.Unmarshal(containerBytesdata, &container)
-				finalOptions[name] = container
-			case "shell":
-				var shell Shell
-				shellBytesdata, _ := json.Marshal(option)
-				json.Unmarshal(shellBytesdata, &shell)
-				finalOptions[name] = shell
-			}
-		}
-
-		plan.Opts = finalOptions
-		plan.Options = nil
-
-		s.Plans[plan.Name] = plan
+	var usersStruct []store.User
+	usersByteData, _ := json.Marshal(users)
+	err = json.Unmarshal(usersByteData, &usersStruct)
+	if err != nil {
+		logger.Fatal("Unable to parse users: %v", users)
 	}
 
-	return s
-}
-
-func (s *StoreStruct) WithUsers(users []User) *StoreStruct {
-	for _, user := range users {
-		s.Users[user.User.Username] = user
+	var serversStruct []store.Server
+	serversByteData, _ := json.Marshal(servers)
+	err = json.Unmarshal(serversByteData, &serversStruct)
+	if err != nil {
+		logger.Fatal("Unable to parse servers: %v", servers)
 	}
 
-	return s
-}
-
-func (s *StoreStruct) WithGroups(groups []Group) *StoreStruct {
-	for _, group := range groups {
-		s.Groups[group.Name] = group
+	var plansStruct []store.Plan
+	plansByteData, _ := json.Marshal(plan)
+	err = json.Unmarshal(plansByteData, &plansStruct)
+	if err != nil {
+		logger.Fatal("Unable to parse plan: %v", plan)
 	}
 
-	return s
+	newStore := store.NewStore()
+	newStore.
+		WithUsers(usersStruct).
+		WithPlans(plansStruct).
+		WithServers(serversStruct).
+		WithGroups(groupsStruct)
+
+	store.Store = newStore
 }
