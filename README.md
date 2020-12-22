@@ -76,6 +76,10 @@ Gatekeeper provides basic authentication, authorization and notifier (default is
 
 Checkout usage of gatekeeper [here](https://github.com/agrim123/gatekeeper-cli).
 
+### Future prospects
+
+Gatekeeper is not limited to only providing shell access, it can used to run deploy commands, as a proxy intermediary, currently the config is entirely file based but can be extended to a database for easy updates and more observability, can be used to run restricted commands on the local system which otherwise unprivileged user cannot run and many more.
+
 ## TODO
 
 - [ ] see infra health (read-only)
