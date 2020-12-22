@@ -2,38 +2,9 @@
 
 Authentication and authorization oriented tool allowing non-root users to ssh to a machine without giving them access to private keys.
 
-## Setup
-
-- The main file which drives gatekeeper goes into `configs/plan.json`. Have a look at sample [plan.json](https://github.com/agrim123/gatekeeper-cli/blob/master/configs/plan-sample.json).
-    - It is a json file with `plan` key as an array of what we call **plans**.
-    - Every plan has a key **name** which is the identifier of that plan.
-    - Each plan has a set of options, with key as identifier and a field **type**, to take the required action when the option is called.
-    - Usage:
-    ```bash
-    $ gatekeeper run-plan plan1 option1 # This gives you custom command line options
-    ```
-- Next important file is `servers.json`.
-    - Each server has a set of instances which contain the username, ip and private key path required to ssh into the instance.
-    - The keys can be put in relative path to gatekeeper binary in `keys` folder.
-- Since, gatekeeper is entirely relies on authentication and authorization of user running the command, the `groups.json` and `users.json` are  critical configurations to gatekeeper working.
-    - Every user is assigned some groups which in turn have `allowed_plans` that can be run by users in that group.
-        - The allowed plans format is `plan.option`, for example, user_service.deploy.
-        - Special cases:
-            - Group `*` defines root privileges. This group has access to every plan, and can run any option.
-            - Group `plan.*` gives access to all options of the plan.
-    - Usernames are mapped to system users, so this gives us an extra security layer.
-- IMP: gatekeeper cannot be run by root user. Instead we run the gatekeeper binary using `+s`.
-
-### [Almost] Secured private keys
-
-The main goal of gatekeeper is to run some commands on or provide access to a server without handing out private keys to all the users.
-Ideal situation is to put all keys on bastion server, and have users access required server (if they are allowed) via gatekeeper.
-
-We use `chmod +s gatekeeper` so that the non root user executing the binary, can use (not access, not read) the protected private key on behalf of the root user.
-
 ## Architecture
 
-The roles are delegated inside gatekeeper for various tasks. The hierarchy is:
+The roles are delegated inside the gatekeeper for various tasks. The hierarchy is:
 ```
 gatekeeper
  |__ guard
@@ -47,30 +18,72 @@ gatekeeper
 
 Gatekeeper is reponsible for calling `guard`, `runtime` and `notifier`. After executing the requested instrctions, the returned status is then notified to the users via `notifier` module. Gatekeeper initializes all the three to default when it is initialized,
 ```golang
-    &GateKeeper{
-		ctx:      ctx,
-		runtime:  runtime.NewDefaultRuntime(),
-		notifier: notifier.GetNotifier(),
-		guard:    guard.NewGuard(),
-	}
+&GateKeeper{
+    ctx:      ctx,
+    runtime:  runtime.NewRuntime(ctx),
+    notifier: notifier.NewDefaultNotifier(),
+    guard:    guard.NewGuard(ctx),
+    store:    store.Store,
+}
 ```
 
-The guard is responsible for authentication and authorizing the user and the command it the user is requesting.
+The guard is responsible for authentication and authorizing the user and the command the user is requesting.
 
-After guard verifies the user, the command is passed to runtime for execution. The required action is taken based on type of command.
+After the guard verifies the user, the command is passed to runtime for execution. The required action is taken based on the type of command.
 
-After execution, whether success or failure, the status is returned back to gatekeeper, which then calls the notifier to inform the user of the result.
+After execution, whether success or failure, the status is returned to the gatekeeper, which then calls the notifier to inform the user of the result.
 
-Every step is focused to be pluggable to provide ease of integrating your own methods.
+Every step is focused to be pluggable to provide ease of integrating your methods.
 
 ### Pluggable modules
 
-Gatekeeper provides basic authentication, authorization and notifier (default is stdout) modules. However, this can easily be customized by adding your own methods and passing them to gatekeeper after initialization initialization.
+Gatekeeper provides basic authentication, authorization, and notifier (default is stdout) modules. However, this can easily be customized by adding your methods and passing them to the gatekeeper after initialization.
 
 ```golang
   gatekeeper := NewGatekeeper(context.Background())
   gatekeeper.WithNotifier(MyCustomNotifier)
 ```
+
+## Setup
+
+Four configs drive gatekeeper:
+- `users.json` [Sample](examples/configs/users.json)
+    - The system users are to be given access to a particular resource.
+    - This is the first and foremost config that is loaded and used to authenticate users.
+    - Every user belongs to some groups, which in turn are allowed to run only a subset of commands.
+- `groups.json` [Sample](examples/configs/groups.json)
+    - Groups are the ACL for the gatekeeper.
+    - Every group has a set of `allowed_plans` that the user belonging to that group can execute.
+    - This is crucial to the authorization step.
+    - Privileged groups:
+        - Group `*` defines root privileges. This group has access to every plan and can run any option.
+        - Group `plan.*` gives access to all options of that plan.
+    - Usernames are mapped to system users, so this gives us an extra security layer.
+
+Since gatekeeper is entirely relying on authentication and authorization of user running the command, the `groups.json` and `users.json` are critical configurations to gatekeeper's working.
+
+- `plan.json` [Sample](examples/configs/plan.json)
+    - Plan can be considered as the master config that defines what all commands are available to users.
+    - It is a JSON file with the `plan` key as an array of what we call **plans**.
+    - Every plan has a key **name** which is the identifier of that plan.
+    - Options:
+        - Each plan has a set of options, with a key as an identifier and a field **type**, to take the required action when the option is called.
+    - Example Usage:
+    ```bash
+    $ gatekeeper run-plan plan1 option1 # This gives us custom command-line options
+    ```
+- `servers.json` [Sample](examples/configs/servers.json)
+    - When doing something on remote instances, this config is responsible for storing the config of ssh hosts, including hostname, port, private key.
+    - Each server has a set of instances that contain the username, IP, and absolute private key path required to ssh into the instance.
+
+A little side note: gatekeeper cannot be run by the root user. Instead, we run the gatekeeper binary using `+s`.
+
+### [Almost] Secured private keys
+
+The main goal of the gatekeeper is to run some commands on or provide access to a server without handing out private keys to all the users.
+The ideal situation is to put all keys on the bastion server and have users access the required server (if they are allowed) via gatekeeper.
+
+We use `chmod +s gatekeeper` so that the non-root user executing the binary, can use (not access, not read) the protected private key on behalf of the root user.
 
 ### Examples
 
@@ -90,7 +103,7 @@ $ gatekeeper run-plan service1 shell
 
 ### Future prospects
 
-Gatekeeper is not limited to only providing shell access, it can used to run deploy commands, as a proxy intermediary, currently the config is entirely file based but can be extended to a database for easy updates and more observability, can be used to run restricted commands on the local system which otherwise unprivileged user cannot run and many more.
+Gatekeeper is not limited to only providing shell access, it can be used to run deploy commands, as a proxy intermediary, currently, the config is entirely file-based but can be extended to a database for easy updates and more observability, can be used to run restricted commands on the local system which otherwise unprivileged user cannot run and many more.
 
 ## TODO
 

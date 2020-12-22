@@ -1,0 +1,15 @@
+{
+    "servers": [
+        {
+            "name": "service1-server",
+            "instances": [
+                {
+                    "user": "ubuntu",
+                    "ip": "127.0.0.1",
+                    "port": "22",
+                    "private_key": "/path/to/keys/service1.pem"
+                }
+            ]
+        }
+    ]
+}

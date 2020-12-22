@@ -1,0 +1,23 @@
+{
+    "plan": [
+        {
+            "name": "service1",
+            "description": "Service1 related",
+            "options": {
+                "shell": {
+                    "type": "shell",
+                    "server": "service1-server"
+                },
+                "deploy": {
+                    "type": "remote",
+                    "server": "service1-server",
+                    "stages": [
+                        "ls -a",
+                        "/usr/bin/whoami",
+                        "echo \"Hello from remote server\""
+                    ]
+                },
+            }
+        }
+    ]
+}
