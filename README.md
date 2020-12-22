@@ -35,6 +35,39 @@ After execution, whether success or failure, the status is returned to the gatek
 
 Every step is focused to be pluggable to provide ease of integrating your methods.
 
+A detailed architecture
+```
+User triggers
++-------------+
+| plan.option |
++-------------+
+      ↓ (1)
++------------+       Loads store           +-------+
+| gatekeeper | <-------------------------> | store |-------------------------------------|
++------------+        on startup           +-------+                                     |
+  |   ↓ (2)                                                                              |
+  |-+-------+                                                                            |
+  | | guard |__________________    (fails if root user is running)                       |
+  | +---                       |                  |                      +----+          |
+  |     | authentication (3) <-|-- fetches user executing the command -> | OS |          |
+  |     |       ↓              |                                         +----+          |
+  |     | authorization  (4) <-|----------------------------------------------------------
+  |     +-------|--------------+        checks which all plan's options are allowed
+  |             |
+  |             |
+  |             | (5)
+  |             | plan.option is finally
+  |             ↓ sent to runtime to be executed
+  |---------+---------+
+  |         | runtime |
+  |         +---------+
+  |             | (6)
+  |             ↓ status is sent to notifier
+  |---------+----------+
+            | notifier |
+            +----------+
+```
+
 ### Pluggable modules
 
 Gatekeeper provides basic authentication, authorization, and notifier (default is stdout) modules. However, this can easily be customized by adding your methods and passing them to the gatekeeper after initialization.
