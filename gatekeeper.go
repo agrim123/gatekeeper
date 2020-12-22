@@ -34,9 +34,9 @@ func NewGatekeeper(ctx context.Context) *GateKeeper {
 
 	g := &GateKeeper{
 		ctx:      ctx,
-		runtime:  runtime.NewDefaultRuntime(),
+		runtime:  runtime.NewRuntime(ctx),
 		notifier: notifier.NewDefaultNotifier(),
-		guard:    guard.NewGuard(),
+		guard:    guard.NewGuard(ctx),
 		store:    store.Store,
 	}
 
@@ -64,9 +64,9 @@ func (g *GateKeeper) WithAuthenticationModule(authenticationModule authenticatio
 // Run runs the command given to the gatekeeper
 // It then delegates different tasks
 func (g *GateKeeper) Run(plan, option string) {
-	g.guard.Verify(g.ctx, plan, option)
+	g.guard.Verify(plan, option)
 
-	err := g.runtime.Execute(g.ctx, plan, option)
+	err := g.runtime.Execute(plan, option)
 	if err != nil {
 		g.notifier.Notify(
 			fmt.Sprintf(

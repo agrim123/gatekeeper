@@ -8,13 +8,17 @@ import (
 	"github.com/agrim123/gatekeeper/internal/store"
 )
 
-type DefaultModule struct{}
-
-func NewDefaultModule() *DefaultModule {
-	return &DefaultModule{}
+type DefaultModule struct {
+	ctx context.Context
 }
 
-func (dm DefaultModule) IsAuthorized(ctx context.Context, plan, option string) (bool, error) {
+func NewDefaultModule(ctx context.Context) *DefaultModule {
+	return &DefaultModule{
+		ctx: ctx,
+	}
+}
+
+func (dm DefaultModule) IsAuthorized(plan, option string) (bool, error) {
 	if plan == "" {
 		return false, fmt.Errorf("No plan specfied. Available plans: %v", store.Store.GetAvailablePlans())
 	}
@@ -24,7 +28,7 @@ func (dm DefaultModule) IsAuthorized(ctx context.Context, plan, option string) (
 	}
 
 	allowedOptions := make([]string, 0)
-	if value, ok := store.Store.GetAllowedCommandsForUser(ctx.Value(constants.UserContextKey).(string))[plan]; ok {
+	if value, ok := store.Store.GetAllowedCommandsForUser(dm.ctx.Value(constants.UserContextKey).(string))[plan]; ok {
 		allowedOptions = value
 	}
 

@@ -11,16 +11,13 @@ type Runtime struct {
 	ctx context.Context
 }
 
-func NewDefaultRuntime() *Runtime {
-	return &Runtime{}
-}
-
 func NewRuntime(ctx context.Context) *Runtime {
-	r := NewDefaultRuntime()
-	return r
+	return &Runtime{
+		ctx: ctx,
+	}
 }
 
-func (r *Runtime) Execute(ctx context.Context, plan, option string) error {
+func (r *Runtime) Execute(plan, option string) error {
 	logger.Info("Executing plan: %s %s", plan, option)
 	return store.Store.Plans[plan].Opts[option].Run()
 }

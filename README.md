@@ -84,6 +84,7 @@ $ gatekeeper run-plan service1 shell
 [INFO]     | Executing plan: service1 shell
 [INFO]     | Spawning shell for <user>@<host>
 [INFO] 🔐  | Reading private key
+[INFO]     | Shell Spawned. Press Ctrl+C to exit.
 <spawned shell>
 ```
 

@@ -16,10 +16,11 @@ type Guard struct {
 	authorizationModule  authorization.Module
 }
 
-func NewGuard() *Guard {
+func NewGuard(ctx context.Context) *Guard {
 	return &Guard{
-		authenticationModule: authentication.NewDefaultModule(),
-		authorizationModule:  authorization.NewDefaultModule(),
+		ctx:                  ctx,
+		authenticationModule: authentication.NewDefaultModule(ctx),
+		authorizationModule:  authorization.NewDefaultModule(ctx),
 	}
 }
 
@@ -33,22 +34,21 @@ func (g *Guard) WithAuthenticationModule(authenticationModule authentication.Mod
 	return g
 }
 
-func (g *Guard) Verify(ctx context.Context, plan, option string) {
-	g.ctx = ctx
+func (g *Guard) Verify(plan, option string) {
 	g.authenticate()
 	g.authorize(plan, option)
 }
 
 func (g *Guard) authenticate() {
-	if authenticated, err := g.authenticationModule.IsAuthenticated(g.ctx); !authenticated {
+	if authenticated, err := g.authenticationModule.IsAuthenticated(); !authenticated {
 		logger.Fatal(err.Error())
 	}
 }
 
 func (g *Guard) authorize(plan, option string) {
-	if authorized, err := g.authorizationModule.IsAuthorized(g.ctx, plan, option); !authorized {
+	if authorized, err := g.authorizationModule.IsAuthorized(plan, option); !authorized {
 		logger.Fatal(err.Error())
-	} else {
-		logger.Success("Authorized `%s` to perform `%s %s`", logger.Underline(g.ctx.Value(constants.UserContextKey).(string)), plan, option)
 	}
+
+	logger.Success("Authorized `%s` to perform `%s %s`", logger.Underline(g.ctx.Value(constants.UserContextKey).(string)), plan, option)
 }

@@ -9,14 +9,18 @@ import (
 	"github.com/agrim123/gatekeeper/pkg/logger"
 )
 
-type DefaultModule struct{}
-
-func NewDefaultModule() *DefaultModule {
-	return &DefaultModule{}
+type DefaultModule struct {
+	ctx context.Context
 }
 
-func (dm DefaultModule) IsAuthenticated(ctx context.Context) (bool, error) {
-	username := utils.GetUsernameFromCtx(ctx)
+func NewDefaultModule(ctx context.Context) *DefaultModule {
+	return &DefaultModule{
+		ctx: ctx,
+	}
+}
+
+func (dm DefaultModule) IsAuthenticated() (bool, error) {
+	username := utils.GetUsernameFromCtx(dm.ctx)
 
 	if _, ok := store.Store.Users[username]; !ok {
 		return false, errors.New("Invalid user: " + username)
