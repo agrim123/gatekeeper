@@ -3,8 +3,8 @@ package store
 import (
 	"encoding/json"
 
-	"github.com/agrim123/gatekeeper/internal/pkg/utils"
 	"github.com/agrim123/gatekeeper/internal/store"
+	"github.com/agrim123/gatekeeper/internal/utils"
 	"github.com/agrim123/gatekeeper/pkg/logger"
 )
 
