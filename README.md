@@ -98,3 +98,4 @@ The `run-plan` command runs the plan defined in `plans.json`.
 - [ ] build image
 - [ ] Log every ssh interaction
 - [ ] Remove container support
+- [ ] Check if private keys exist beforehand

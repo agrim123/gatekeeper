@@ -1,14 +1,12 @@
 package store
 
 import (
-	"path/filepath"
 	"strings"
 
 	"github.com/agrim123/gatekeeper/internal/constants"
 	"github.com/agrim123/gatekeeper/internal/pkg/filesystem"
 	"github.com/agrim123/gatekeeper/internal/pkg/filesystem/archive"
 	"github.com/agrim123/gatekeeper/internal/pkg/services/remote"
-	"github.com/spf13/viper"
 )
 
 type Instance struct {
@@ -45,7 +43,6 @@ func (s *Server) NormalizeInstancesPrivateKeys() {
 	instances := make([]*Instance, len(s.Instances))
 
 	for i, instance := range s.Instances {
-		instance.normalizePrivateKeyPath()
 		instances[i] = instance
 	}
 
@@ -59,8 +56,4 @@ func (i *Instance) Run(cmds []string) error {
 	remoteConnection.RunCommand(strings.Join(cmds, "; "))
 
 	return nil
-}
-
-func (i *Instance) normalizePrivateKeyPath() {
-	i.PrivateKey = filepath.Join(viper.GetString("basepath"), i.PrivateKey)
 }
