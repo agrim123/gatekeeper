@@ -4,7 +4,7 @@ Authentication and authorization oriented tool allowing non-root users to ssh to
 
 ## Setup
 
-- The main file which drives gatekeeper goes into `configs/plan.json`. Have a look at sample `plan.json`.
+- The main file which drives gatekeeper goes into `configs/plan.json`. Have a look at sample [plan.json](https://github.com/agrim123/gatekeeper-cli/blob/master/configs/plan.json).
     - It is a json file with `plan` key as an array of what we call **plans**.
     - Every plan has a key **name** which is the identifier of that plan.
     - Each plan has a set of options, with key as identifier and a field **type**, to take the required action when the option is called.
@@ -21,7 +21,7 @@ Authentication and authorization oriented tool allowing non-root users to ssh to
         - Special cases:
             - Group `*` defines root privileges. This group has access to every plan, and can run any option.
             - Group `plan.*` gives access to all options of the plan.
-    - Usernames are mapped to system users, so this gives an extra security layer, since user cannot spoof its own system user name.
+    - Usernames are mapped to system users, so this gives us an extra security layer.
 - IMP: gatekeeper cannot be run by root user. Instead we run the gatekeeper binary using `+s`.
 
 ### [Almost] Secured private keys
@@ -65,30 +65,16 @@ Every step is focused to be pluggable to provide ease of integrating your own me
 
 ### Pluggable modules
 
-Gatekeeper provides basic authentication, authorization and notifier (default is slack, confirgured by slack webhook in confg.toml, and a fallback to stdout) modules. However, this can easily be customized by adding your own methods and passing them to gatekeeper on initialization.
+Gatekeeper provides basic authentication, authorization and notifier (default is stdout) modules. However, this can easily be customized by adding your own methods and passing them to gatekeeper after initialization initialization.
 
-## Usage
-
-```bash
-$ gatekeeper
-Gatekeeper is an authentication and authorization oriented deployment and access managment tool.
-
-Usage:
-  gatekeeper [command]
-
-Available Commands:
-  help        Help about any command
-  list        Lists all commands the user can run
-  run-plan    Runs the specified plan with given option
-  self        Gatekeeper management commands
-
-Flags:
-  -h, --help   help for gatekeeper
-
-Use "gatekeeper [command] --help" for more information about a command.
+```golang
+  gatekeeper := NewGatekeeper(context.Background())
+  gatekeeper.WithNotifier(MyCustomNotifier)
 ```
 
-The `run-plan` command runs the plan defined in `plans.json`.
+### Examples
+
+Checkout usage of gatekeeper [here](https://github.com/agrim123/gatekeeper-cli).
 
 ## TODO
 
