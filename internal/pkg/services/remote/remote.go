@@ -113,6 +113,7 @@ func (r *Remote) SpawnShell() error {
 	// Ctrl-C exists the shell
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func(session *ssh.Session) {
+		logger.Info("Started shell. Press %s to exit", logger.Bold("Ctrl+C"))
 		<-c
 		logger.Info("Ctrl+C pressed. Exiting remote shell")
 		session.Signal(ssh.SIGTERM)
