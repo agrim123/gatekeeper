@@ -19,16 +19,16 @@ func getFromContext(ctx context.Context, key constants.ContextKeyType) string {
 }
 
 func AttachExecutingUserToCtx(ctx context.Context) context.Context {
-	return context.WithValue(ctx, constants.UserContextKey, getExecutingUser())
+	return context.WithValue(ctx, constants.UserContextKey, GetExecutingUser())
 }
 
 func GetUsernameFromCtx(ctx context.Context) string {
 	return getFromContext(ctx, constants.UserContextKey)
 }
 
-func getExecutingUser() string {
+func GetExecutingUser() string {
 	user, err := user.Current()
-	if err != nil {
+	if err != nil || user.Username == "" {
 		panic(err)
 	}
 

@@ -24,7 +24,7 @@ func (dm DefaultModule) IsAuthorized(ctx context.Context, plan, option string) (
 	}
 
 	allowedOptions := make([]string, 0)
-	if value, ok := store.Store.GetAllowedCommands(ctx.Value(constants.UserContextKey).(string))[plan]; ok {
+	if value, ok := store.Store.GetAllowedCommandsForUser(ctx.Value(constants.UserContextKey).(string))[plan]; ok {
 		allowedOptions = value
 	}
 

@@ -3,6 +3,7 @@ package store
 import (
 	"encoding/json"
 
+	"github.com/agrim123/gatekeeper/internal/pkg/utils"
 	"github.com/agrim123/gatekeeper/internal/store"
 	"github.com/agrim123/gatekeeper/pkg/logger"
 )
@@ -44,4 +45,8 @@ func InitStore(users, plan, servers, groups interface{}) {
 		WithGroups(groupsStruct)
 
 	store.Store = newStore
+}
+
+func GetAllowedCommandsForUser() map[string][]string {
+	return store.Store.GetAllowedCommandsForUser(utils.GetExecutingUser())
 }

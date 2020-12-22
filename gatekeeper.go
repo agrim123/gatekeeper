@@ -6,7 +6,6 @@ import (
 
 	"github.com/agrim123/gatekeeper/internal/constants"
 	"github.com/agrim123/gatekeeper/internal/guard"
-	"github.com/agrim123/gatekeeper/internal/pkg/filesystem"
 	"github.com/agrim123/gatekeeper/internal/pkg/utils"
 	"github.com/agrim123/gatekeeper/internal/runtime"
 	"github.com/agrim123/gatekeeper/internal/store"
@@ -29,7 +28,7 @@ type GateKeeper struct {
 // NewGatekeeper returns new instance of gatekeeper with default modules
 func NewGatekeeper(ctx context.Context) *GateKeeper {
 	// Initializes the staging path for containers
-	filesystem.CreateDir(constants.RootStagingPath)
+	// filesystem.CreateDir(constants.RootStagingPath)
 
 	ctx = utils.AttachExecutingUserToCtx(ctx)
 
