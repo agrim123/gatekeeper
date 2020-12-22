@@ -4,7 +4,7 @@ Authentication and authorization oriented tool allowing non-root users to ssh to
 
 ## Setup
 
-- The main file which drives gatekeeper goes into `configs/plan.json`. Have a look at sample [plan.json](https://github.com/agrim123/gatekeeper-cli/blob/master/configs/plan.json).
+- The main file which drives gatekeeper goes into `configs/plan.json`. Have a look at sample [plan.json](https://github.com/agrim123/gatekeeper-cli/blob/master/configs/plan-sample.json).
     - It is a json file with `plan` key as an array of what we call **plans**.
     - Every plan has a key **name** which is the identifier of that plan.
     - Each plan has a set of options, with key as identifier and a field **type**, to take the required action when the option is called.
