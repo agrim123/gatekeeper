@@ -99,7 +99,7 @@ Since gatekeeper is entirely relying on authentication and authorization of user
     - Plan can be considered as the master config that defines what all commands are available to users.
     - It is a JSON file with the `plan` key as an array of what we call **plans**.
     - Every plan has a key **name** which is the identifier of that plan.
-    - Options:
+    - [Options](#supported-options):
         - Each plan has a set of options, with a key as an identifier and a field **type**, to take the required action when the option is called.
     - Example Usage:
     ```bash
@@ -118,7 +118,90 @@ The ideal situation is to put all keys on the bastion server and have users acce
 
 We use `chmod +s gatekeeper` so that the non-root user executing the binary, can use (not access, not read) the protected private key on behalf of the root user.
 
-### Examples
+## Supported options
+
+Options as identified by **type**, available options are:
+
+### `local`
+
+For running commands on local system. Can be useful if user doesn't have permission to execute certain commands, and can run only those without giving any other access.
+
+```json
+"options": {
+    "some_cmd_name": {
+        "type": "local",
+        "stages": [
+            "ls"
+        ]
+    },
+}
+```
+
+Note: Here `some_cmd_name` is the command that can be provided to user to run from cli. Options are actually identified by **type**.
+
+### `shell`
+
+Spawns a pseudo shell for the given server.
+
+```json
+"options": {
+    "some_cmd_name": {
+        "type": "shell",
+        "server": "service1-server"
+    },
+}
+```
+
+### `remote`
+
+Runs commands on a remote server. Can be useful to trigger deploy commands without giving ssh access to user.
+
+```json
+"options": {
+    "some_cmd_name": {
+        "type": "remote",
+        "server": "service1-server",
+        "stages": [
+            "ls -a",
+            "/usr/bin/whoami",
+            "echo \"Hello from remote server\""
+        ]
+    },
+}
+```
+
+### `container`
+
+Can be used to spawn a docker container. Container is flexible enough to do anything, mount a volume, build something, open a remote shell or run commands etc.
+
+```json
+"options": {
+    "some_cmd_name": {
+        "type": "container",
+        "server": "service1-server",
+        "protected": false,
+        "volumes": {
+            "/host/path/to/volume": "/container/path/to/mount/to"
+        },
+        "stages": [
+            {
+                "command": [
+                    "ssh",
+                    "-i",
+                    "/home/deploy/keys/service1.pem",
+                    "ec2-user@host",
+                    "ls -a"
+                ],
+                "privileged": false
+            }
+        ]
+    }
+}
+```
+
+This by default mounts the provided **server** private key to container. (this is yet to be fixed).
+
+## Examples
 
 Checkout usage of gatekeeper [here](https://github.com/agrim123/gatekeeper-cli).
 

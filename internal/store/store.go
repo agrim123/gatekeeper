@@ -50,7 +50,6 @@ func (s *StoreStruct) WithPlans(plans []Plan) *StoreStruct {
 				json.Unmarshal(localBytesdata, &local)
 				finalOptions[name] = local
 			case "container":
-				continue
 				var container Container
 				containerBytesdata, _ := json.Marshal(option)
 				json.Unmarshal(containerBytesdata, &container)

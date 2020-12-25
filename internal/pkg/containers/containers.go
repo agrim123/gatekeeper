@@ -13,6 +13,7 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/client"
+	v1 "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
 const (
@@ -98,8 +99,12 @@ func (c *Container) Create() error {
 		Image: c.Image,
 		Cmd:   containerHold,
 		User:  NonRootUser,
-	}, &c.HostConfig, nil, nil, c.Name)
+	}, &c.HostConfig, nil, &v1.Platform{
+		Architecture: "amd64",
+		OS:           "linux",
+	}, c.Name)
 	if err != nil {
+		fmt.Println(err)
 		return err
 	}
 
