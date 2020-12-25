@@ -12,6 +12,7 @@ import (
 	"github.com/agrim123/gatekeeper/pkg/authentication"
 	"github.com/agrim123/gatekeeper/pkg/authorization"
 	"github.com/agrim123/gatekeeper/pkg/notifier"
+	storePkg "github.com/agrim123/gatekeeper/pkg/store"
 )
 
 type GateKeeper struct {
@@ -59,6 +60,18 @@ func (g *GateKeeper) WithAuthorizationModule(authorizationModule authorization.M
 func (g *GateKeeper) WithAuthenticationModule(authenticationModule authentication.Module) *GateKeeper {
 	g.guard = g.guard.WithAuthenticationModule(authenticationModule)
 	return g
+}
+
+func (g *GateKeeper) AllowedCommands() map[string][]string {
+	return g.store.GetAllowedCommandsForUser(utils.GetExecutingUser())
+}
+
+func (g *GateKeeper) Whoami() *storePkg.Whoami {
+	return &storePkg.Whoami{
+		Username:        utils.GetExecutingUser(),
+		Groups:          store.Store.Users[utils.GetExecutingUser()].Groups,
+		AllowedCommands: g.AllowedCommands(),
+	}
 }
 
 // Run runs the command given to the gatekeeper
