@@ -90,13 +90,14 @@ func (r *Remote) RunCommand(cmd string) {
 }
 
 // MakeNewConnection initiates new ssh connection to given host
-func (r *Remote) MakeNewConnection() {
+func (r *Remote) MakeNewConnection() error {
 	connection, err := ssh.Dial("tcp", r.address, &r.Config)
 	if err != nil {
-		logger.Fatal("Failed to connect to %s. Error: %s", r.address, err.Error())
+		return fmt.Errorf("Failed to connect to %s. Error: %s", r.address, err.Error())
 	}
 
 	r.Client = connection
+	return nil
 }
 
 // SpawnShell spwans shell on remote machine

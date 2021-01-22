@@ -11,10 +11,10 @@ func NewDefaultNotifier() Default {
 }
 
 func (d Default) Notify(message string) error {
-	d.FallbackNotify(message)
+	logger.Notifier(message)
 	return nil
 }
 
-func (d Default) FallbackNotify(message string) {
-	logger.Notifier(message)
+func (d Default) Name() string {
+	return "default"
 }

@@ -77,6 +77,27 @@ Gatekeeper provides basic authentication, authorization, and notifier (default i
   gatekeeper.WithNotifier(MyCustomNotifier)
 ```
 
+#### Notifier Module
+
+Default notifier module logs to stdout. However, it can entirely be customized by creating you own module and injecting it to gattekeeper on initialization. 
+
+`SlackNotifier` is also present but disabled by default. It can be enabled by using:
+```golang
+    gatekeeper := NewGatekeeper(context.Background())
+    gatekeeper.WithNotifier(notifier.NewSlackNotifier("<SLACK_WEBHOOK_URL>"))
+```
+
+If any notifer fails, the default behaviour is to dump logs to stdout, so that you don't miss out any logs.
+```bash
+[SUCCESS]  | Authenticated as agrim
+[SUCCESS]  | Authorized `agrim` to perform `service1 shell`
+[INFO]     | Executing plan: service1 shell
+[INFO]     | Spawning shell for <user>@<host>
+[INFO] 🔐  | Reading private key
+[ERROR]    | Notifier: slack failed. Fallback to default notifier
+[NOTIFIER] | Plan `service1 shell` executed by `agrim` failed. Error: Failed to connect to <user>@<host>. Error: dial tcp 3.84.241.53:22: i/o timeout
+```
+
 ## Setup
 
 Four configs drive gatekeeper:

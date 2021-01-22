@@ -23,7 +23,7 @@ type GateKeeper struct {
 	runtime *runtime.Runtime
 	guard   *guard.Guard
 
-	notifier notifier.Notifier
+	notifyRequester func(string)
 }
 
 // NewGatekeeper returns new instance of gatekeeper with default modules
@@ -34,19 +34,19 @@ func NewGatekeeper(ctx context.Context) *GateKeeper {
 	ctx = utils.AttachExecutingUserToCtx(ctx)
 
 	g := &GateKeeper{
-		ctx:      ctx,
-		runtime:  runtime.NewRuntime(ctx),
-		notifier: notifier.NewDefaultNotifier(),
-		guard:    guard.NewGuard(ctx),
-		store:    store.Store,
+		ctx:             ctx,
+		runtime:         runtime.NewRuntime(ctx),
+		notifyRequester: notifier.AttachFallbackNotifier(notifier.NewDefaultNotifier()),
+		guard:           guard.NewGuard(ctx),
+		store:           store.Store,
 	}
 
 	return g
 }
 
 // WithNotifier updates the notifier module
-func (g *GateKeeper) WithNotifier(notifier notifier.Notifier) *GateKeeper {
-	g.notifier = notifier
+func (g *GateKeeper) WithNotifier(customNotifier notifier.Notifier) *GateKeeper {
+	g.notifyRequester = notifier.AttachFallbackNotifier(customNotifier)
 	return g
 }
 
@@ -81,7 +81,7 @@ func (g *GateKeeper) Run(plan, option string) {
 
 	err := g.runtime.Execute(plan, option)
 	if err != nil {
-		g.notifier.Notify(
+		g.notifyRequester(
 			fmt.Sprintf(
 				"Plan `%s %s` executed by `%s` failed. Error: %s",
 				plan,
@@ -91,7 +91,7 @@ func (g *GateKeeper) Run(plan, option string) {
 			),
 		)
 	} else {
-		g.notifier.Notify(
+		g.notifyRequester(
 			fmt.Sprintf(
 				"Plan `%s %s` executed by `%s` successfully!",
 				plan,

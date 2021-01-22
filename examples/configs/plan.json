@@ -16,7 +16,7 @@
                         "/usr/bin/whoami",
                         "echo \"Hello from remote server\""
                     ]
-                },
+                }
             }
         }
     ]

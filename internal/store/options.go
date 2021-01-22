@@ -50,11 +50,15 @@ func (s Shell) Run() error {
 	logger.Info("Spawning shell for %s", logger.Bold(instance.String()))
 
 	r := remote.NewRemoteConnection(instance.User, instance.IP, instance.Port, instance.PrivateKey)
-	r.MakeNewConnection()
+	err := r.MakeNewConnection()
+	if err != nil {
+		return err
+	}
+
 	r.SpawnShell()
 	r.Close()
 
-	return nil
+	return err
 }
 
 type Remote struct {
