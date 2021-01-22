@@ -95,7 +95,7 @@ If any notifer fails, the default behaviour is to dump logs to stdout, so that y
 [INFO]     | Spawning shell for <user>@<host>
 [INFO] 🔐  | Reading private key
 [ERROR]    | Notifier: slack failed. Fallback to default notifier
-[NOTIFIER] | Plan `service1 shell` executed by `agrim` failed. Error: Failed to connect to <user>@<host>. Error: dial tcp 3.84.241.53:22: i/o timeout
+[NOTIFIER] | Plan `service1 shell` executed by `agrim` failed. Error: Failed to connect to <user>@<host>. Error: dial tcp: i/o timeout
 ```
 
 ## Setup
