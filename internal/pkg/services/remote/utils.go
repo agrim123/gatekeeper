@@ -10,10 +10,10 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-func NewRemoteConnection(user, ip, port, privateKey string) *Remote {
+func NewRemoteConnection(user, ip, port, privateKey string) (*Remote, error) {
 	pubkey, err := getPubKeyAuthMethod(privateKey)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	remote := Remote{
@@ -28,7 +28,7 @@ func NewRemoteConnection(user, ip, port, privateKey string) *Remote {
 		address: ip + ":" + port,
 	}
 
-	return &remote
+	return &remote, nil
 }
 
 func verifyPrivateKeyPermissions(privateKey string) error {
@@ -77,5 +77,6 @@ func setupPty(session *ssh.Session) error {
 		logger.Error("Request for pseudo terminal failed. Error: %s", err.Error())
 		return err
 	}
+
 	return nil
 }

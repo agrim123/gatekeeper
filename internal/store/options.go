@@ -2,9 +2,7 @@ package store
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"log"
 	"os/exec"
 	"path/filepath"
 	"strconv"
@@ -49,13 +47,21 @@ func (s Shell) Run() error {
 
 	logger.Info("Spawning shell for %s", logger.Bold(instance.String()))
 
-	r := remote.NewRemoteConnection(instance.User, instance.IP, instance.Port, instance.PrivateKey)
-	err := r.MakeNewConnection()
+	r, err := remote.NewRemoteConnection(instance.User, instance.IP, instance.Port, instance.PrivateKey)
 	if err != nil {
 		return err
 	}
 
-	r.SpawnShell()
+	err = r.MakeNewConnection()
+	if err != nil {
+		return err
+	}
+
+	err = r.SpawnShell()
+	if err != nil {
+		return err
+	}
+
 	r.Close()
 
 	return err
@@ -72,7 +78,10 @@ func (r Remote) Run() error {
 
 	for _, instance := range server.Instances {
 		logger.Info("Running stages on %s", logger.Bold(instance.String()))
-		instance.Run(r.Stages)
+		err := instance.Run(r.Stages)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -89,11 +98,12 @@ func (l Local) Run() error {
 		fmt.Println("Running command: " + stage)
 		out, err := exec.Command(stage).Output()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		fmt.Println(string(out))
 	}
+
 	return nil
 }
 
@@ -142,7 +152,7 @@ func (c Container) Run() error {
 	container.Create()
 	err := container.Start(context.Background())
 	if err != nil {
-		return errors.New("Unable to complete plan")
+		return fmt.Errorf("Unable to complete plan. Error: %s", err.Error())
 	}
 
 	container.TailLogs()

@@ -11,6 +11,7 @@ import (
 	"github.com/agrim123/gatekeeper/internal/utils"
 	"github.com/agrim123/gatekeeper/pkg/authentication"
 	"github.com/agrim123/gatekeeper/pkg/authorization"
+	"github.com/agrim123/gatekeeper/pkg/logger"
 	"github.com/agrim123/gatekeeper/pkg/notifier"
 	storePkg "github.com/agrim123/gatekeeper/pkg/store"
 )
@@ -84,9 +85,9 @@ func (g *GateKeeper) Run(plan, option string) {
 		g.notifyRequester(
 			fmt.Sprintf(
 				"Plan `%s %s` executed by `%s` failed. Error: %s",
-				plan,
-				option,
-				g.ctx.Value(constants.UserContextKey),
+				logger.Underline(plan),
+				logger.Underline(option),
+				logger.Bold(g.ctx.Value(constants.UserContextKey).(string)),
 				err.Error(),
 			),
 		)
@@ -94,9 +95,9 @@ func (g *GateKeeper) Run(plan, option string) {
 		g.notifyRequester(
 			fmt.Sprintf(
 				"Plan `%s %s` executed by `%s` successfully!",
-				plan,
-				option,
-				g.ctx.Value(constants.UserContextKey),
+				logger.Underline(plan),
+				logger.Underline(option),
+				logger.Bold(g.ctx.Value(constants.UserContextKey).(string)),
 			),
 		)
 	}

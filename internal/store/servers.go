@@ -50,10 +50,16 @@ func (s *Server) NormalizeInstancesPrivateKeys() {
 }
 
 func (i *Instance) Run(cmds []string) error {
-	remoteConnection := remote.NewRemoteConnection(i.User, i.IP, i.Port, i.PrivateKey)
+	remoteConnection, err := remote.NewRemoteConnection(i.User, i.IP, i.Port, i.PrivateKey)
 	defer remoteConnection.Close()
-	remoteConnection.MakeNewConnection()
-	remoteConnection.RunCommand(strings.Join(cmds, "; "))
+	if err != nil {
+		return err
+	}
 
-	return nil
+	err = remoteConnection.MakeNewConnection()
+	if err != nil {
+		return err
+	}
+
+	return remoteConnection.RunCommand(strings.Join(cmds, "; "))
 }

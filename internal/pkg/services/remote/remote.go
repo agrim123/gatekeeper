@@ -61,32 +61,34 @@ func (r *Remote) RunCommands(cmds []string) {
 }
 
 // RunCommand runs a single command over a ssh connection
-func (r *Remote) RunCommand(cmd string) {
+func (r *Remote) RunCommand(cmd string) error {
 	logger.Info("Running `%s`", cmd)
 	sess, err := r.Client.NewSession()
 	if err != nil {
-		panic(err)
+		logger.Fatal("Unable to run requested command: %s. Error: %s", cmd, err.Error())
 	}
 	defer sess.Close()
 
 	sessStdOut, err := sess.StdoutPipe()
 	if err != nil {
-		panic(err)
+		logger.Fatal("Unable to run requested command: %s. Error: %s", cmd, err.Error())
 	}
 
 	go io.Copy(os.Stdout, sessStdOut)
 
 	sessStderr, err := sess.StderrPipe()
 	if err != nil {
-		panic(err)
+		logger.Fatal("Unable to run requested command: %s. Error: %s", cmd, err.Error())
 	}
 
 	go io.Copy(os.Stderr, sessStderr)
 
 	err = sess.Run(cmd)
 	if err != nil {
-		panic(err)
+		logger.Fatal("Unable to run requested command: %s. Error: %s", cmd, err.Error())
 	}
+
+	return nil
 }
 
 // MakeNewConnection initiates new ssh connection to given host
