@@ -1,12 +1,11 @@
 package containers
 
 import (
-	"archive/tar"
 	"context"
-	"io"
-	"os"
+	"fmt"
 
 	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
 )
 
@@ -14,33 +13,37 @@ type Image struct {
 	ID string
 }
 
-var _ io.Reader = (*os.File)(nil)
-
-func BuildImageFromTar(tarPath string) (*Image, error) {
-	file, err := os.Open(tarPath)
+func CheckIfImageExists(ctx context.Context, reference string) error {
+	cli, err := client.NewEnvClient()
+	defer cli.Close()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	content := tar.NewReader(file)
+	filterMap := make(map[string]string)
+	filterMap["reference"] = reference
 
-	buildOptions := types.ImageBuildOptions{
-		// Tags:       []string{challengeTag},
-		Remove: true,
+	filterArgs := filters.NewArgs()
+	for key, val := range filterMap {
+		filterArgs.Add(key, val)
 	}
 
-	dockerClient, err := client.NewEnvClient()
+	images, err := cli.ImageList(ctx, types.ImageListOptions{
+		All:     false,
+		Filters: filterArgs,
+	})
+
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	imageBuildResp, err := dockerClient.ImageBuild(context.Background(), content, buildOptions)
-	if err != nil {
-		return nil, err
+	if len(images) == 0 {
+		return fmt.Errorf("No image %s found", reference)
 	}
-	defer imageBuildResp.Body.Close()
 
-	// TODO: return id
+	return nil
+}
 
-	return nil, err
+func BuildImage(dockerfile string) error {
+	return nil
 }

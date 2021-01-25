@@ -10,6 +10,6 @@ const (
 	RootStagingPath           = "/tmp/gatekeeper/"
 	PrivateKeysStagingPath    = RootStagingPath + "keys/"
 	PrivateKeysStagingTarPath = RootStagingPath + "keys.tar"
-	BaseImageName             = "gatekeeper"
+	BaseImageName             = "gatekeeper:latest"
 	BaseContainerName         = "gatekeeper"
 )

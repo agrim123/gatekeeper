@@ -30,6 +30,8 @@ var (
 )
 
 type Container struct {
+	Ctx context.Context
+
 	ID   string
 	Name string
 
@@ -76,16 +78,36 @@ func (c *Container) normalizeMounts() {
 	c.containerMounts = mountBindings
 }
 
-func (c *Container) Create() error {
+func (c *Container) checkPrerequisite() error {
 	cli, err := client.NewEnvClient()
 	defer cli.Close()
 	if err != nil {
 		return err
 	}
 
-	ctx := context.Background()
+	if err := CheckIfImageExists(c.Ctx, c.Image); err != nil {
+		logger.Warn("Unable to find image %s", c.Image)
+		err = BuildImage("Dockerfile")
+		if err != nil {
+			return err
+		}
+	}
 
-	RemoveContainerIfExistsByName(ctx, c.Name)
+	return nil
+}
+
+func (c *Container) Create() error {
+	if err := c.checkPrerequisite(); err != nil {
+		return err
+	}
+
+	cli, err := client.NewEnvClient()
+	defer cli.Close()
+	if err != nil {
+		return err
+	}
+
+	RemoveContainerIfExistsByName(c.Ctx, c.Name)
 
 	c.normalizeMounts()
 
@@ -95,7 +117,7 @@ func (c *Container) Create() error {
 		c.HostConfig = container.HostConfig{}
 	}
 
-	resp, err := cli.ContainerCreate(ctx, &container.Config{
+	resp, err := cli.ContainerCreate(c.Ctx, &container.Config{
 		Image: c.Image,
 		Cmd:   containerHold,
 		User:  NonRootUser,
@@ -104,7 +126,6 @@ func (c *Container) Create() error {
 		OS:           "linux",
 	}, c.Name)
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 
@@ -130,7 +151,7 @@ func (c *Container) copyFiles(ctx context.Context, cli *client.Client) {
 }
 
 func (c *Container) runStage(ctx context.Context, cli *client.Client, stage Stage) error {
-	logger.L().P(stage.Privileged).Infof("Running stage: %s, with user: %s", logger.Bold(stage.String()), stage.user)
+	logger.L().P(stage.Privileged).Infof("Running stage: %s, with user: %s", logger.Bold(stage.String()), logger.Underline(stage.user))
 	a, err := cli.ContainerExecCreate(ctx, c.ID, types.ExecConfig{
 		User:         stage.user,
 		Cmd:          stage.Command,
@@ -155,7 +176,10 @@ func (c *Container) runStage(ctx context.Context, cli *client.Client, stage Stag
 		return err
 	}
 
-	logger.Info("%s %s", logger.Bold("Output:"), b)
+	if len(b) > 0 {
+		logger.Info("%s %s", logger.Bold("Output:"), b)
+	}
+
 	return nil
 }
 
@@ -223,13 +247,14 @@ func (c *Container) Stop() error {
 	}
 
 	// Try to stop using default timeout we are using for beast
-	err = cli.ContainerStop(context.Background(), c.ID, &containerTimeout)
+	err = cli.ContainerStop(c.Ctx, c.ID, &containerTimeout)
 	if err != nil {
 		if err != nil {
 			logger.Error("Unable to stop container: %s, Error: %s", c.ID, err.Error())
 		}
 		return err
 	}
+
 	logger.Info("Stopped container: %s", logger.Bold(c.ID))
 
 	return nil
@@ -243,7 +268,7 @@ func (c *Container) Remove() error {
 	}
 
 	logger.Info("Removing container: %s", logger.Bold(c.ID))
-	err = cli.ContainerRemove(context.Background(), c.ID, types.ContainerRemoveOptions{
+	err = cli.ContainerRemove(c.Ctx, c.ID, types.ContainerRemoveOptions{
 		RemoveVolumes: true,
 		Force:         true,
 	})
@@ -256,8 +281,8 @@ func (c *Container) Remove() error {
 }
 
 func (c *Container) Cleanup() {
-	if err := c.Stop(); err != nil {
-		c.Remove()
+	if err := c.Stop(); err == nil {
+		err = c.Remove()
 	}
 }
 
@@ -268,7 +293,7 @@ func (c *Container) TailLogs() {
 		panic(err)
 	}
 
-	stream, err := cli.ContainerLogs(context.Background(), c.ID, types.ContainerLogsOptions{
+	stream, err := cli.ContainerLogs(c.Ctx, c.ID, types.ContainerLogsOptions{
 		ShowStdout: true,
 		ShowStderr: true,
 		Details:    true,

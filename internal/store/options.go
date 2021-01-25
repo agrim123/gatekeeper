@@ -117,12 +117,15 @@ type Container struct {
 }
 
 func (c Container) Run() error {
+	ctx := context.Background()
+
 	stages := make([]containers.Stage, len(c.Stages))
 	for i, stage := range c.Stages {
 		stages[i] = *containers.NewStage(stage.Command, stage.Privileged)
 	}
 
 	container := containers.Container{
+		Ctx:         ctx,
 		Image:       constants.BaseImageName,
 		Name:        constants.BaseContainerName,
 		Stages:      stages,
@@ -149,10 +152,14 @@ func (c Container) Run() error {
 		))
 	}
 
-	container.Create()
-	err := container.Start(context.Background())
+	err := container.Create()
 	if err != nil {
-		return fmt.Errorf("Unable to complete plan. Error: %s", err.Error())
+		return err
+	}
+
+	err = container.Start(ctx)
+	if err != nil {
+		return err
 	}
 
 	container.TailLogs()
