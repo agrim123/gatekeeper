@@ -87,7 +87,7 @@ func (c *Container) checkPrerequisite() error {
 
 	if err := CheckIfImageExists(c.Ctx, c.Image); err != nil {
 		logger.Warn("Unable to find image %s", c.Image)
-		err = BuildImage("Dockerfile")
+		err = BuildImage(c.Ctx, c.Image, "Dockerfile")
 		if err != nil {
 			return err
 		}
