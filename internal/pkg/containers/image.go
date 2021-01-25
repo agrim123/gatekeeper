@@ -4,6 +4,7 @@ import (
 	"archive/tar"
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -17,17 +18,16 @@ import (
 
 type Image struct {
 	ID string
+
+	Reference string
 }
 
-func CheckIfImageExists(ctx context.Context, reference string) error {
+func SearchImage(ctx context.Context, filterMap map[string]string) (*Image, error) {
 	cli, err := client.NewEnvClient()
 	defer cli.Close()
 	if err != nil {
-		return err
+		return nil, err
 	}
-
-	filterMap := make(map[string]string)
-	filterMap["reference"] = reference
 
 	filterArgs := filters.NewArgs()
 	for key, val := range filterMap {
@@ -40,22 +40,25 @@ func CheckIfImageExists(ctx context.Context, reference string) error {
 	})
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if len(images) == 0 {
-		return fmt.Errorf("No image %s found", reference)
+		return nil, fmt.Errorf("No image found")
 	}
 
-	return nil
+	return &Image{
+		ID:        images[0].ID[7:],
+		Reference: filterMap["reference"],
+	}, nil
 }
 
-func BuildImage(ctx context.Context, reference, dockerfile string) error {
+func BuildImage(ctx context.Context, reference, dockerfile string) (*Image, error) {
 	logger.Info("Building image %s", logger.Underline(reference))
 	cli, err := client.NewEnvClient()
 	defer cli.Close()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// Create a buffer
@@ -66,13 +69,13 @@ func BuildImage(ctx context.Context, reference, dockerfile string) error {
 	// Create a filereader
 	dockerFileReader, err := os.Open(dockerfile)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// Read the actual Dockerfile
 	readDockerFile, err := ioutil.ReadAll(dockerFileReader)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// Make a TAR header for the file
@@ -84,13 +87,13 @@ func BuildImage(ctx context.Context, reference, dockerfile string) error {
 	// Writes the header described for the TAR file
 	err = tw.WriteHeader(tarHeader)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// Writes the dockerfile data to the TAR file
 	_, err = tw.Write(readDockerFile)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	dockerFileTarReader := bytes.NewReader(buf.Bytes())
@@ -109,17 +112,21 @@ func BuildImage(ctx context.Context, reference, dockerfile string) error {
 		buildOptions,
 	)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// Read the STDOUT from the build process
 	defer imageBuildResponse.Body.Close()
 	_, err = io.Copy(os.Stdout, imageBuildResponse.Body)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	logger.Success("Successfully built image %s", logger.Underline(reference))
 
-	return nil
+	if image, err := SearchImage(ctx, map[string]string{"reference": reference}); err == nil {
+		return image, nil
+	}
+
+	return nil, errors.New("Unable to find image")
 }

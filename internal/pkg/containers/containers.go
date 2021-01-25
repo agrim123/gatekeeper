@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/agrim123/gatekeeper/internal/constants"
 	"github.com/agrim123/gatekeeper/internal/pkg/filesystem"
 	"github.com/agrim123/gatekeeper/pkg/logger"
 	"github.com/docker/docker/api/types"
@@ -35,7 +36,9 @@ type Container struct {
 	ID   string
 	Name string
 
-	Image string
+	ImageReference string
+
+	image Image
 
 	Stages []Stage
 
@@ -85,12 +88,14 @@ func (c *Container) checkPrerequisite() error {
 		return err
 	}
 
-	if err := CheckIfImageExists(c.Ctx, c.Image); err != nil {
-		logger.Warn("Unable to find image %s", c.Image)
-		err = BuildImage(c.Ctx, c.Image, "Dockerfile")
+	if image, err := SearchImage(c.Ctx, map[string]string{"reference": constants.BaseImageName}); err != nil {
+		logger.Warn("Unable to find image %s", c.ImageReference)
+		image, err = BuildImage(c.Ctx, c.ImageReference, "Dockerfile")
 		if err != nil {
 			return err
 		}
+	} else {
+		c.image = *image
 	}
 
 	return nil
@@ -118,7 +123,7 @@ func (c *Container) Create() error {
 	}
 
 	resp, err := cli.ContainerCreate(c.Ctx, &container.Config{
-		Image: c.Image,
+		Image: c.ImageReference,
 		Cmd:   containerHold,
 		User:  NonRootUser,
 	}, &c.HostConfig, nil, &v1.Platform{

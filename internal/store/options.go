@@ -125,13 +125,13 @@ func (c Container) Run() error {
 	}
 
 	container := containers.Container{
-		Ctx:         ctx,
-		Image:       constants.BaseImageName,
-		Name:        constants.BaseContainerName,
-		Stages:      stages,
-		Mounts:      c.Volumes,
-		FilesToCopy: []string{Store.Servers[c.Server].GetPrivateKeysTar()},
-		Protected:   c.Protected,
+		Ctx:            ctx,
+		ImageReference: constants.BaseImageName,
+		Name:           constants.BaseContainerName,
+		Stages:         stages,
+		Mounts:         c.Volumes,
+		FilesToCopy:    []string{Store.Servers[c.Server].GetPrivateKeysTar()},
+		Protected:      c.Protected,
 	}
 
 	container.AddPreStage(*containers.NewStage([]string{
